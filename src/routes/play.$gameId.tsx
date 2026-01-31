@@ -269,18 +269,28 @@ function GamePlay() {
   // Handle submitting a contest guess
   const handleContestSubmit = async (position: number) => {
     if (!currentRound) return
-    setContestSubmitted(true)
 
-    // Spend token locally immediately for responsive UI
-    setMyTokens((prev) => prev - 1)
+    try {
+      // Optimistically update UI
+      setContestSubmitted(true)
+      setMyTokens((prev) => prev - 1)
 
-    await submitContestGuess({
-      data: {
-        gameId: game.id,
-        roundId: currentRound.roundId,
-        position,
-      },
-    })
+      const result = await submitContestGuess({
+        data: {
+          gameId: game.id,
+          roundId: currentRound.roundId,
+          position,
+        },
+      })
+
+      console.log('Contest submitted successfully:', result)
+    } catch (error) {
+      // Revert optimistic updates on failure
+      console.error('Contest submission failed:', error)
+      setContestSubmitted(false)
+      setMyTokens((prev) => prev + 1)
+      // Could add a toast notification here
+    }
   }
 
   // Handle revealing results (current player only, after contest window)

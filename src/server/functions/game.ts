@@ -473,6 +473,8 @@ export const submitContestGuess = createServerFn({
 })
   .inputValidator((data: { gameId: string; roundId: string; position: number }) => data)
   .handler(async ({ data }) => {
+    console.log('submitContestGuess called with:', data)
+
     const session = await getSession()
     if (!session) {
       throw new Error('Not logged in')
@@ -498,12 +500,17 @@ export const submitContestGuess = createServerFn({
     }
 
     // Can only contest during CONTESTING phase
+    console.log('submitContestGuess: round.status =', round.status)
     if (round.status !== 'CONTESTING') {
+      console.log('submitContestGuess FAILED: Contest window is closed')
       throw new Error('Contest window is closed')
     }
 
-    // Check if contest window has expired
-    if (round.contestDeadline && Date.now() > round.contestDeadline.getTime()) {
+    // Check if contest window has expired (with 2s buffer for network latency)
+    const DEADLINE_BUFFER_MS = 2000
+    console.log('submitContestGuess: deadline check', { deadline: round.contestDeadline, now: Date.now() })
+    if (round.contestDeadline && Date.now() > round.contestDeadline.getTime() + DEADLINE_BUFFER_MS) {
+      console.log('submitContestGuess FAILED: Contest window has expired')
       throw new Error('Contest window has expired')
     }
 
@@ -512,16 +519,20 @@ export const submitContestGuess = createServerFn({
     })
 
     if (!player) {
+      console.log('submitContestGuess FAILED: Player not found')
       throw new Error('Player not found')
     }
+    console.log('submitContestGuess: player =', { id: player.id, tokens: player.tokens })
 
     // Cannot contest your own placement
     if (player.id === round.game.currentPlayerId) {
+      console.log('submitContestGuess FAILED: Cannot contest your own placement')
       throw new Error('Cannot contest your own placement')
     }
 
     // Must have at least 1 token
     if (player.tokens < 1) {
+      console.log('submitContestGuess FAILED: No tokens available')
       throw new Error('No tokens available')
     }
 
@@ -529,9 +540,11 @@ export const submitContestGuess = createServerFn({
     const originalGuess = round.guesses.find(
       (g) => g.playerId === round.game.currentPlayerId
     )
+    console.log('submitContestGuess: originalGuess position =', originalGuess?.placementPosition, 'contest position =', data.position)
 
     // Cannot place in the same position as the current player
     if (originalGuess?.placementPosition === data.position) {
+      console.log('submitContestGuess FAILED: Same position as original')
       throw new Error('Cannot place in the same position as the current player')
     }
 
@@ -544,8 +557,11 @@ export const submitContestGuess = createServerFn({
         },
       },
     })
+    console.log('submitContestGuess: existingGuess =', existingGuess)
 
-    if (existingGuess?.placementPosition !== null) {
+    // Only reject if there's an existing guess with a placement already set
+    if (existingGuess && existingGuess.placementPosition !== null) {
+      console.log('submitContestGuess FAILED: Already submitted')
       throw new Error('Already submitted a contest guess')
     }
 
@@ -897,6 +913,16 @@ export const revealResults = createServerFn({
     if (round.contestDeadline && Date.now() < round.contestDeadline.getTime()) {
       throw new Error('Contest window has not ended yet')
     }
+
+    // DEBUG: Log guesses before revealing
+    console.log('revealResults: guesses loaded =', {
+      count: round.guesses.length,
+      guesses: round.guesses.map(g => ({
+        playerId: g.playerId,
+        isContest: g.isContest,
+        position: g.placementPosition,
+      })),
+    })
 
     return await revealResultsInternal(data.gameId, data.roundId, player, round)
   })
