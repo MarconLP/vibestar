@@ -85,12 +85,15 @@ export const startGame = createServerFn({
         currentRound: 1,
         currentPlayerId: room.players[0].id,
         rounds: {
-          create: roundSongs.map((song, index) => ({
-            roundNumber: index + 1,
-            songId: song.id,
-            clipStartTime: calculateClipStart(song.duration, room.clipDuration),
-            clipEndTime: calculateClipStart(song.duration, room.clipDuration) + room.clipDuration,
-          })),
+          create: roundSongs.map((song, index) => {
+            const clipStart = calculateClipStart(song.duration, room.clipDuration)
+            return {
+              roundNumber: index + 1,
+              songId: song.id,
+              clipStartTime: clipStart,
+              clipEndTime: clipStart + room.clipDuration,
+            }
+          }),
         },
       },
       include: {
