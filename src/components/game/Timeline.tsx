@@ -53,7 +53,7 @@ export function Timeline({ entries, placingMode = false, onPlacement, blockedPos
         {getContestVotesForPosition(0).map((vote, i) => (
           <ContestMarker key={`contest-0-${i}`} contesterName={vote.contesterName} />
         ))}
-        {placingMode && (
+        {placingMode && guessPosition !== 0 && (
           <DropZone position={0} onDrop={onPlacement} label="Before all" blocked={blockedPosition === 0} />
         )}
 
@@ -66,7 +66,7 @@ export function Timeline({ entries, placingMode = false, onPlacement, blockedPos
             {getContestVotesForPosition(index + 1).map((vote, i) => (
               <ContestMarker key={`contest-${index + 1}-${i}`} contesterName={vote.contesterName} />
             ))}
-            {placingMode && (
+            {placingMode && guessPosition !== index + 1 && (
               <DropZone
                 position={index + 1}
                 onDrop={onPlacement}
