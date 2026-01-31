@@ -12,7 +12,7 @@ interface RoundResultProps {
 }
 
 export function RoundResult({ result, isMyTurn, onContinue }: RoundResultProps) {
-  const { songNameGuess, songNameCorrect, placementCorrect, timelineCount, actualSong, tokenEarned, contestResults, currentPlayerTimeline } = result
+  const { songNameGuess, songNameCorrect, timelineCount, actualSong, tokenEarned, contestResults, currentPlayerTimeline } = result
 
   // Build result markers for the timeline
   const resultMarkers = contestResults?.map((cr) => ({
@@ -60,87 +60,32 @@ export function RoundResult({ result, isMyTurn, onContinue }: RoundResultProps) 
       )}
 
 
-      {/* Regular Results (shown when no contests) */}
-      {!hasContests && (
-        <div className="space-y-4 mb-6">
-          {/* Song Name Result */}
-          <div className="flex items-center justify-between p-4 rounded-xl bg-neutral-800/50 border border-white/5">
-            <div>
-              <p className="text-neutral-400 text-sm">Song Name Guess</p>
-              <p className="text-white">
-                {songNameGuess || <span className="text-neutral-500 italic">No guess</span>}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              {songNameCorrect ? (
-                <>
-                  <span className="flex items-center gap-1 text-yellow-400 font-bold text-sm">
-                    <Coins className="w-4 h-4" />
-                    +1 token
-                  </span>
-                  <div className="p-1 rounded-full bg-green-500">
-                    <Check className="w-4 h-4 text-white" />
-                  </div>
-                </>
-              ) : (
-                <div className="p-1 rounded-full bg-red-500">
-                  <X className="w-4 h-4 text-white" />
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Placement Result */}
-          <div className="flex items-center justify-between p-4 rounded-xl bg-neutral-800/50 border border-white/5">
-            <div>
-              <p className="text-neutral-400 text-sm">Timeline Placement</p>
-              <p className="text-white">
-                {placementCorrect ? 'Correct! Song added to timeline' : 'Wrong position'}
-              </p>
-            </div>
-            <div className="flex items-center gap-2">
-              {placementCorrect ? (
-                <div className="p-1 rounded-full bg-green-500">
-                  <Check className="w-4 h-4 text-white" />
-                </div>
-              ) : (
-                <div className="p-1 rounded-full bg-red-500">
-                  <X className="w-4 h-4 text-white" />
-                </div>
-              )}
-            </div>
-          </div>
+      {/* Song Name Result */}
+      <div className="mb-6 flex items-center justify-between p-4 rounded-xl bg-neutral-800/50 border border-white/5">
+        <div>
+          <p className="text-neutral-400 text-sm">Song Name Guess</p>
+          <p className="text-white">
+            {songNameGuess || <span className="text-neutral-500 italic">No guess</span>}
+          </p>
         </div>
-      )}
-
-      {/* Song Name Result (when contests exist, show separately) */}
-      {hasContests && (
-        <div className="mb-6 flex items-center justify-between p-4 rounded-xl bg-neutral-800/50 border border-white/5">
-          <div>
-            <p className="text-neutral-400 text-sm">Song Name Guess</p>
-            <p className="text-white">
-              {songNameGuess || <span className="text-neutral-500 italic">No guess</span>}
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            {songNameCorrect ? (
-              <>
-                <span className="flex items-center gap-1 text-yellow-400 font-bold text-sm">
-                  <Coins className="w-4 h-4" />
-                  +1 token
-                </span>
-                <div className="p-1 rounded-full bg-green-500">
-                  <Check className="w-4 h-4 text-white" />
-                </div>
-              </>
-            ) : (
-              <div className="p-1 rounded-full bg-red-500">
-                <X className="w-4 h-4 text-white" />
+        <div className="flex items-center gap-2">
+          {songNameCorrect ? (
+            <>
+              <span className="flex items-center gap-1 text-yellow-400 font-bold text-sm">
+                <Coins className="w-4 h-4" />
+                +1 token
+              </span>
+              <div className="p-1 rounded-full bg-green-500">
+                <Check className="w-4 h-4 text-white" />
               </div>
-            )}
-          </div>
+            </>
+          ) : (
+            <div className="p-1 rounded-full bg-red-500">
+              <X className="w-4 h-4 text-white" />
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       {/* Token earned notification */}
       {isMyTurn && tokenEarned && (
