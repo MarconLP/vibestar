@@ -11,17 +11,17 @@ import type {
   RoomGameStartedEvent,
 } from '@/lib/pusher/events'
 
-export const Route = createFileRoute('/game/room/$code')({
+export const Route = createFileRoute('/room/$code')({
   component: RoomLobby,
   loader: async ({ params }) => {
     const room = await getRoomByCode({ data: { code: params.code } })
 
     if (!room) {
-      throw redirect({ to: '/game' })
+      throw redirect({ to: '/' })
     }
 
     if (room.game) {
-      throw redirect({ to: '/game/play/$gameId', params: { gameId: room.game.id } })
+      throw redirect({ to: '/play/$gameId', params: { gameId: room.game.id } })
     }
 
     const playlists = await getPlaylists()
@@ -61,7 +61,7 @@ function RoomLobby() {
     })
 
     bind<RoomGameStartedEvent>('room:game-started', (data) => {
-      navigate({ to: '/game/play/$gameId', params: { gameId: data.gameId } })
+      navigate({ to: '/play/$gameId', params: { gameId: data.gameId } })
     })
 
     return () => {
@@ -118,7 +118,7 @@ function RoomLobby() {
   const handleLeave = async () => {
     try {
       await leaveRoom({ data: { roomId: room.id } })
-      navigate({ to: '/game' })
+      navigate({ to: '/' })
     } catch (err) {
       console.error('Failed to leave room:', err)
     }

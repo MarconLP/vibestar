@@ -30,13 +30,13 @@ interface TimelineEntry {
   }
 }
 
-export const Route = createFileRoute('/game/play/$gameId')({
+export const Route = createFileRoute('/play/$gameId')({
   component: GamePlay,
   loader: async ({ params }) => {
     const result = await getGame({ data: { gameId: params.gameId } })
 
     if (!result.game) {
-      throw redirect({ to: '/game' })
+      throw redirect({ to: '/' })
     }
 
     const currentRound = await getCurrentRound({ data: { gameId: params.gameId } })

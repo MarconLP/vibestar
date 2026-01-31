@@ -4,7 +4,7 @@ import { ArrowLeft, Loader2, Settings } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { createRoom } from '@/server/functions/room'
 
-export const Route = createFileRoute('/game/create')({
+export const Route = createFileRoute('/create')({
   component: CreateGame,
 })
 
@@ -23,7 +23,7 @@ function CreateGame() {
       const room = await createRoom({
         data: { clipDuration, maxPlayers },
       })
-      navigate({ to: '/game/room/$code', params: { code: room.code } })
+      navigate({ to: '/room/$code', params: { code: room.code } })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create room')
       setIsCreating(false)
@@ -39,7 +39,7 @@ function CreateGame() {
     >
       <div className="w-full max-w-md">
         <Link
-          to="/game"
+          to="/"
           className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />

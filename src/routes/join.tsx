@@ -4,7 +4,7 @@ import { ArrowLeft, Loader2, Users } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { joinRoom } from '@/server/functions/room'
 
-export const Route = createFileRoute('/game/join')({
+export const Route = createFileRoute('/join')({
   component: JoinGame,
 })
 
@@ -24,7 +24,7 @@ function JoinGame() {
     try {
       const result = await joinRoom({ data: { code: code.toUpperCase() } })
       if (result.room) {
-        navigate({ to: '/game/room/$code', params: { code: result.room.code } })
+        navigate({ to: '/room/$code', params: { code: result.room.code } })
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to join room')
@@ -46,7 +46,7 @@ function JoinGame() {
     >
       <div className="w-full max-w-md">
         <Link
-          to="/game"
+          to="/"
           className="inline-flex items-center gap-2 text-gray-400 hover:text-white mb-6 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />

@@ -9,14 +9,13 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as JoinRouteImport } from './routes/join'
+import { Route as CreateRouteImport } from './routes/create'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as GameIndexRouteImport } from './routes/game/index'
-import { Route as GameJoinRouteImport } from './routes/game/join'
-import { Route as GameCreateRouteImport } from './routes/game/create'
+import { Route as RoomCodeRouteImport } from './routes/room.$code'
+import { Route as PlayGameIdRouteImport } from './routes/play.$gameId'
 import { Route as DemoPrismaRouteImport } from './routes/demo/prisma'
 import { Route as DemoBetterAuthRouteImport } from './routes/demo/better-auth'
-import { Route as GameRoomCodeRouteImport } from './routes/game/room.$code'
-import { Route as GamePlayGameIdRouteImport } from './routes/game/play.$gameId'
 import { Route as DemoStartServerFuncsRouteImport } from './routes/demo/start.server-funcs'
 import { Route as DemoStartApiRequestRouteImport } from './routes/demo/start.api-request'
 import { Route as DemoApiNamesRouteImport } from './routes/demo/api.names'
@@ -27,24 +26,29 @@ import { Route as DemoStartSsrSpaModeRouteImport } from './routes/demo/start.ssr
 import { Route as DemoStartSsrFullSsrRouteImport } from './routes/demo/start.ssr.full-ssr'
 import { Route as DemoStartSsrDataOnlyRouteImport } from './routes/demo/start.ssr.data-only'
 
+const JoinRoute = JoinRouteImport.update({
+  id: '/join',
+  path: '/join',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CreateRoute = CreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const GameIndexRoute = GameIndexRouteImport.update({
-  id: '/game/',
-  path: '/game/',
+const RoomCodeRoute = RoomCodeRouteImport.update({
+  id: '/room/$code',
+  path: '/room/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
-const GameJoinRoute = GameJoinRouteImport.update({
-  id: '/game/join',
-  path: '/game/join',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GameCreateRoute = GameCreateRouteImport.update({
-  id: '/game/create',
-  path: '/game/create',
+const PlayGameIdRoute = PlayGameIdRouteImport.update({
+  id: '/play/$gameId',
+  path: '/play/$gameId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoPrismaRoute = DemoPrismaRouteImport.update({
@@ -55,16 +59,6 @@ const DemoPrismaRoute = DemoPrismaRouteImport.update({
 const DemoBetterAuthRoute = DemoBetterAuthRouteImport.update({
   id: '/demo/better-auth',
   path: '/demo/better-auth',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GameRoomCodeRoute = GameRoomCodeRouteImport.update({
-  id: '/game/room/$code',
-  path: '/game/room/$code',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GamePlayGameIdRoute = GamePlayGameIdRouteImport.update({
-  id: '/game/play/$gameId',
-  path: '/game/play/$gameId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DemoStartServerFuncsRoute = DemoStartServerFuncsRouteImport.update({
@@ -115,18 +109,17 @@ const DemoStartSsrDataOnlyRoute = DemoStartSsrDataOnlyRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/create': typeof CreateRoute
+  '/join': typeof JoinRoute
   '/demo/better-auth': typeof DemoBetterAuthRoute
   '/demo/prisma': typeof DemoPrismaRoute
-  '/game/create': typeof GameCreateRoute
-  '/game/join': typeof GameJoinRoute
-  '/game/': typeof GameIndexRoute
+  '/play/$gameId': typeof PlayGameIdRoute
+  '/room/$code': typeof RoomCodeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/pusher/auth': typeof ApiPusherAuthRoute
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
-  '/game/play/$gameId': typeof GamePlayGameIdRoute
-  '/game/room/$code': typeof GameRoomCodeRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
@@ -134,18 +127,17 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/create': typeof CreateRoute
+  '/join': typeof JoinRoute
   '/demo/better-auth': typeof DemoBetterAuthRoute
   '/demo/prisma': typeof DemoPrismaRoute
-  '/game/create': typeof GameCreateRoute
-  '/game/join': typeof GameJoinRoute
-  '/game': typeof GameIndexRoute
+  '/play/$gameId': typeof PlayGameIdRoute
+  '/room/$code': typeof RoomCodeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/pusher/auth': typeof ApiPusherAuthRoute
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
-  '/game/play/$gameId': typeof GamePlayGameIdRoute
-  '/game/room/$code': typeof GameRoomCodeRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
@@ -154,18 +146,17 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/create': typeof CreateRoute
+  '/join': typeof JoinRoute
   '/demo/better-auth': typeof DemoBetterAuthRoute
   '/demo/prisma': typeof DemoPrismaRoute
-  '/game/create': typeof GameCreateRoute
-  '/game/join': typeof GameJoinRoute
-  '/game/': typeof GameIndexRoute
+  '/play/$gameId': typeof PlayGameIdRoute
+  '/room/$code': typeof RoomCodeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/pusher/auth': typeof ApiPusherAuthRoute
   '/demo/api/names': typeof DemoApiNamesRoute
   '/demo/start/api-request': typeof DemoStartApiRequestRoute
   '/demo/start/server-funcs': typeof DemoStartServerFuncsRoute
-  '/game/play/$gameId': typeof GamePlayGameIdRoute
-  '/game/room/$code': typeof GameRoomCodeRoute
   '/demo/start/ssr/data-only': typeof DemoStartSsrDataOnlyRoute
   '/demo/start/ssr/full-ssr': typeof DemoStartSsrFullSsrRoute
   '/demo/start/ssr/spa-mode': typeof DemoStartSsrSpaModeRoute
@@ -175,18 +166,17 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/create'
+    | '/join'
     | '/demo/better-auth'
     | '/demo/prisma'
-    | '/game/create'
-    | '/game/join'
-    | '/game/'
+    | '/play/$gameId'
+    | '/room/$code'
     | '/api/auth/$'
     | '/api/pusher/auth'
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
-    | '/game/play/$gameId'
-    | '/game/room/$code'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
@@ -194,18 +184,17 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/create'
+    | '/join'
     | '/demo/better-auth'
     | '/demo/prisma'
-    | '/game/create'
-    | '/game/join'
-    | '/game'
+    | '/play/$gameId'
+    | '/room/$code'
     | '/api/auth/$'
     | '/api/pusher/auth'
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
-    | '/game/play/$gameId'
-    | '/game/room/$code'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
@@ -213,18 +202,17 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/create'
+    | '/join'
     | '/demo/better-auth'
     | '/demo/prisma'
-    | '/game/create'
-    | '/game/join'
-    | '/game/'
+    | '/play/$gameId'
+    | '/room/$code'
     | '/api/auth/$'
     | '/api/pusher/auth'
     | '/demo/api/names'
     | '/demo/start/api-request'
     | '/demo/start/server-funcs'
-    | '/game/play/$gameId'
-    | '/game/room/$code'
     | '/demo/start/ssr/data-only'
     | '/demo/start/ssr/full-ssr'
     | '/demo/start/ssr/spa-mode'
@@ -233,18 +221,17 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CreateRoute: typeof CreateRoute
+  JoinRoute: typeof JoinRoute
   DemoBetterAuthRoute: typeof DemoBetterAuthRoute
   DemoPrismaRoute: typeof DemoPrismaRoute
-  GameCreateRoute: typeof GameCreateRoute
-  GameJoinRoute: typeof GameJoinRoute
-  GameIndexRoute: typeof GameIndexRoute
+  PlayGameIdRoute: typeof PlayGameIdRoute
+  RoomCodeRoute: typeof RoomCodeRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiPusherAuthRoute: typeof ApiPusherAuthRoute
   DemoApiNamesRoute: typeof DemoApiNamesRoute
   DemoStartApiRequestRoute: typeof DemoStartApiRequestRoute
   DemoStartServerFuncsRoute: typeof DemoStartServerFuncsRoute
-  GamePlayGameIdRoute: typeof GamePlayGameIdRoute
-  GameRoomCodeRoute: typeof GameRoomCodeRoute
   DemoStartSsrDataOnlyRoute: typeof DemoStartSsrDataOnlyRoute
   DemoStartSsrFullSsrRoute: typeof DemoStartSsrFullSsrRoute
   DemoStartSsrSpaModeRoute: typeof DemoStartSsrSpaModeRoute
@@ -253,6 +240,20 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/join': {
+      id: '/join'
+      path: '/join'
+      fullPath: '/join'
+      preLoaderRoute: typeof JoinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/create': {
+      id: '/create'
+      path: '/create'
+      fullPath: '/create'
+      preLoaderRoute: typeof CreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -260,25 +261,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/game/': {
-      id: '/game/'
-      path: '/game'
-      fullPath: '/game/'
-      preLoaderRoute: typeof GameIndexRouteImport
+    '/room/$code': {
+      id: '/room/$code'
+      path: '/room/$code'
+      fullPath: '/room/$code'
+      preLoaderRoute: typeof RoomCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/game/join': {
-      id: '/game/join'
-      path: '/game/join'
-      fullPath: '/game/join'
-      preLoaderRoute: typeof GameJoinRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/game/create': {
-      id: '/game/create'
-      path: '/game/create'
-      fullPath: '/game/create'
-      preLoaderRoute: typeof GameCreateRouteImport
+    '/play/$gameId': {
+      id: '/play/$gameId'
+      path: '/play/$gameId'
+      fullPath: '/play/$gameId'
+      preLoaderRoute: typeof PlayGameIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo/prisma': {
@@ -293,20 +287,6 @@ declare module '@tanstack/react-router' {
       path: '/demo/better-auth'
       fullPath: '/demo/better-auth'
       preLoaderRoute: typeof DemoBetterAuthRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/game/room/$code': {
-      id: '/game/room/$code'
-      path: '/game/room/$code'
-      fullPath: '/game/room/$code'
-      preLoaderRoute: typeof GameRoomCodeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/game/play/$gameId': {
-      id: '/game/play/$gameId'
-      path: '/game/play/$gameId'
-      fullPath: '/game/play/$gameId'
-      preLoaderRoute: typeof GamePlayGameIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/demo/start/server-funcs': {
@@ -377,18 +357,17 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CreateRoute: CreateRoute,
+  JoinRoute: JoinRoute,
   DemoBetterAuthRoute: DemoBetterAuthRoute,
   DemoPrismaRoute: DemoPrismaRoute,
-  GameCreateRoute: GameCreateRoute,
-  GameJoinRoute: GameJoinRoute,
-  GameIndexRoute: GameIndexRoute,
+  PlayGameIdRoute: PlayGameIdRoute,
+  RoomCodeRoute: RoomCodeRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiPusherAuthRoute: ApiPusherAuthRoute,
   DemoApiNamesRoute: DemoApiNamesRoute,
   DemoStartApiRequestRoute: DemoStartApiRequestRoute,
   DemoStartServerFuncsRoute: DemoStartServerFuncsRoute,
-  GamePlayGameIdRoute: GamePlayGameIdRoute,
-  GameRoomCodeRoute: GameRoomCodeRoute,
   DemoStartSsrDataOnlyRoute: DemoStartSsrDataOnlyRoute,
   DemoStartSsrFullSsrRoute: DemoStartSsrFullSsrRoute,
   DemoStartSsrSpaModeRoute: DemoStartSsrSpaModeRoute,
