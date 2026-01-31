@@ -1,4 +1,4 @@
-import { getRequest } from '@tanstack/start-server-core'
+import { getRequest } from '@tanstack/react-start/server'
 import { auth } from './auth'
 
 // Get the current better-auth session from the request
