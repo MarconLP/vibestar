@@ -39,7 +39,7 @@ export interface GameRoundStartEvent {
 }
 
 export interface GameRoundPhaseEvent {
-  phase: 'PLAYING_CLIP' | 'PLACING' | 'REVEALING'
+  phase: 'PLAYING_CLIP' | 'PLACING' | 'CONTESTING' | 'REVEALING'
 }
 
 export interface GameRoundResultEvent {
@@ -47,8 +47,9 @@ export interface GameRoundResultEvent {
   songNameGuess: string | null
   songNameCorrect: boolean
   placementCorrect: boolean
+  placementPosition: number // The position where the player placed the song
   timelineCount: number
-  canBeContested: boolean // True if placement was wrong and others can steal
+  canBeContested: boolean
   tokenEarned: boolean // True if player earned a token from correct song guess
   playerTokens: number // The player's current token count (for syncing across clients)
   actualSong: {
@@ -56,14 +57,35 @@ export interface GameRoundResultEvent {
     artist: string
     releaseYear: number
   }
+  contestResults?: Array<{
+    playerId: string
+    playerName: string
+    isOriginal: boolean
+    position: number | null
+    isCorrect: boolean
+  }>
 }
 
-export interface GameContestStartEvent {
+export interface GameContestSubmittedEvent {
+  contesterId: string
+  contesterName: string
+  position: number
+  newTokenCount: number
+}
+
+export interface GameContestWindowEvent {
   roundId: string
-  songId: string
-  songName: string
-  songArtist: string
-  releaseYear: number
+  currentPlayerId: string
+  currentPlayerTimeline: Array<{
+    id: string
+    position: number
+    song: {
+      name: string
+      artist: string
+      releaseYear: number
+    }
+  }>
+  placementPosition: number // Where the current player placed the song
   contestDeadline: number // Timestamp when contest window closes
 }
 

@@ -7,13 +7,11 @@ interface RoundResultProps {
   isMyTurn: boolean
   onContinue: () => void
   myTokens?: number
-  onStartContest?: () => void
+  otherPlayersCount?: number
 }
 
-export function RoundResult({ result, isMyTurn, onContinue, myTokens = 0, onStartContest }: RoundResultProps) {
-  const { songNameGuess, songNameCorrect, placementCorrect, timelineCount, actualSong, canBeContested, tokenEarned } = result
-
-  const canContest = !isMyTurn && canBeContested && myTokens > 0
+export function RoundResult({ result, isMyTurn, onContinue }: RoundResultProps) {
+  const { songNameGuess, songNameCorrect, placementCorrect, timelineCount, actualSong, tokenEarned, contestResults } = result
 
   return (
     <div className="p-6 rounded-2xl bg-neutral-900/50 border border-white/10 backdrop-blur-sm">
@@ -88,6 +86,25 @@ export function RoundResult({ result, isMyTurn, onContinue, myTokens = 0, onStar
         </div>
       </div>
 
+      {/* Contest Results */}
+      {contestResults && contestResults.length > 1 && (
+        <div className="mb-6 p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/30">
+          <p className="text-yellow-400 font-medium mb-3">Contest Results:</p>
+          <div className="space-y-2">
+            {contestResults.map((cr) => (
+              <div key={cr.playerId} className="flex items-center justify-between text-sm">
+                <span className="text-white">
+                  {cr.playerName} {cr.isOriginal ? '(original)' : '(contest)'}
+                </span>
+                <span className={cr.isCorrect ? 'text-green-400' : 'text-red-400'}>
+                  {cr.isCorrect ? 'Correct!' : 'Wrong'}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Token earned notification */}
       {isMyTurn && tokenEarned && (
         <div className="mb-6 p-3 rounded-xl bg-yellow-500/10 border border-yellow-500/30 text-center">
@@ -110,22 +127,6 @@ export function RoundResult({ result, isMyTurn, onContinue, myTokens = 0, onStar
           {SONGS_TO_WIN - timelineCount} more to win!
         </p>
       </div>
-
-      {/* Contest Button - for other players when placement was wrong */}
-      {canContest && (
-        <div className="mb-4">
-          <button
-            onClick={onStartContest}
-            className="w-full py-3 px-4 rounded-xl font-semibold bg-yellow-500 text-black transition-all duration-200 hover:bg-yellow-400 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
-          >
-            <Coins className="w-5 h-5" />
-            Contest & Steal Song (1 token)
-          </button>
-          <p className="text-xs text-neutral-500 text-center mt-2">
-            You have {myTokens} token{myTokens !== 1 ? 's' : ''}. Place correctly to add the song to your timeline!
-          </p>
-        </div>
-      )}
 
       {/* Continue Button - only for the player whose turn it was */}
       {isMyTurn ? (

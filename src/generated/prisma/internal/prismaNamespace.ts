@@ -1219,7 +1219,8 @@ export const GameRoundScalarFieldEnum = {
   clipEndTime: 'clipEndTime',
   status: 'status',
   startedAt: 'startedAt',
-  endedAt: 'endedAt'
+  endedAt: 'endedAt',
+  contestDeadline: 'contestDeadline'
 } as const
 
 export type GameRoundScalarFieldEnum = (typeof GameRoundScalarFieldEnum)[keyof typeof GameRoundScalarFieldEnum]
@@ -1233,6 +1234,7 @@ export const RoundGuessScalarFieldEnum = {
   songNameCorrect: 'songNameCorrect',
   placementPosition: 'placementPosition',
   placementCorrect: 'placementCorrect',
+  isContest: 'isContest',
   pointsEarned: 'pointsEarned',
   submittedAt: 'submittedAt'
 } as const

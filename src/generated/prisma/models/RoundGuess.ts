@@ -44,6 +44,7 @@ export type RoundGuessMinAggregateOutputType = {
   songNameCorrect: boolean | null
   placementPosition: number | null
   placementCorrect: boolean | null
+  isContest: boolean | null
   pointsEarned: number | null
   submittedAt: Date | null
 }
@@ -56,6 +57,7 @@ export type RoundGuessMaxAggregateOutputType = {
   songNameCorrect: boolean | null
   placementPosition: number | null
   placementCorrect: boolean | null
+  isContest: boolean | null
   pointsEarned: number | null
   submittedAt: Date | null
 }
@@ -68,6 +70,7 @@ export type RoundGuessCountAggregateOutputType = {
   songNameCorrect: number
   placementPosition: number
   placementCorrect: number
+  isContest: number
   pointsEarned: number
   submittedAt: number
   _all: number
@@ -92,6 +95,7 @@ export type RoundGuessMinAggregateInputType = {
   songNameCorrect?: true
   placementPosition?: true
   placementCorrect?: true
+  isContest?: true
   pointsEarned?: true
   submittedAt?: true
 }
@@ -104,6 +108,7 @@ export type RoundGuessMaxAggregateInputType = {
   songNameCorrect?: true
   placementPosition?: true
   placementCorrect?: true
+  isContest?: true
   pointsEarned?: true
   submittedAt?: true
 }
@@ -116,6 +121,7 @@ export type RoundGuessCountAggregateInputType = {
   songNameCorrect?: true
   placementPosition?: true
   placementCorrect?: true
+  isContest?: true
   pointsEarned?: true
   submittedAt?: true
   _all?: true
@@ -215,6 +221,7 @@ export type RoundGuessGroupByOutputType = {
   songNameCorrect: boolean
   placementPosition: number | null
   placementCorrect: boolean
+  isContest: boolean
   pointsEarned: number
   submittedAt: Date
   _count: RoundGuessCountAggregateOutputType | null
@@ -250,6 +257,7 @@ export type RoundGuessWhereInput = {
   songNameCorrect?: Prisma.BoolFilter<"RoundGuess"> | boolean
   placementPosition?: Prisma.IntNullableFilter<"RoundGuess"> | number | null
   placementCorrect?: Prisma.BoolFilter<"RoundGuess"> | boolean
+  isContest?: Prisma.BoolFilter<"RoundGuess"> | boolean
   pointsEarned?: Prisma.IntFilter<"RoundGuess"> | number
   submittedAt?: Prisma.DateTimeFilter<"RoundGuess"> | Date | string
   round?: Prisma.XOR<Prisma.GameRoundScalarRelationFilter, Prisma.GameRoundWhereInput>
@@ -264,6 +272,7 @@ export type RoundGuessOrderByWithRelationInput = {
   songNameCorrect?: Prisma.SortOrder
   placementPosition?: Prisma.SortOrderInput | Prisma.SortOrder
   placementCorrect?: Prisma.SortOrder
+  isContest?: Prisma.SortOrder
   pointsEarned?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
   round?: Prisma.GameRoundOrderByWithRelationInput
@@ -282,6 +291,7 @@ export type RoundGuessWhereUniqueInput = Prisma.AtLeast<{
   songNameCorrect?: Prisma.BoolFilter<"RoundGuess"> | boolean
   placementPosition?: Prisma.IntNullableFilter<"RoundGuess"> | number | null
   placementCorrect?: Prisma.BoolFilter<"RoundGuess"> | boolean
+  isContest?: Prisma.BoolFilter<"RoundGuess"> | boolean
   pointsEarned?: Prisma.IntFilter<"RoundGuess"> | number
   submittedAt?: Prisma.DateTimeFilter<"RoundGuess"> | Date | string
   round?: Prisma.XOR<Prisma.GameRoundScalarRelationFilter, Prisma.GameRoundWhereInput>
@@ -296,6 +306,7 @@ export type RoundGuessOrderByWithAggregationInput = {
   songNameCorrect?: Prisma.SortOrder
   placementPosition?: Prisma.SortOrderInput | Prisma.SortOrder
   placementCorrect?: Prisma.SortOrder
+  isContest?: Prisma.SortOrder
   pointsEarned?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
   _count?: Prisma.RoundGuessCountOrderByAggregateInput
@@ -316,6 +327,7 @@ export type RoundGuessScalarWhereWithAggregatesInput = {
   songNameCorrect?: Prisma.BoolWithAggregatesFilter<"RoundGuess"> | boolean
   placementPosition?: Prisma.IntNullableWithAggregatesFilter<"RoundGuess"> | number | null
   placementCorrect?: Prisma.BoolWithAggregatesFilter<"RoundGuess"> | boolean
+  isContest?: Prisma.BoolWithAggregatesFilter<"RoundGuess"> | boolean
   pointsEarned?: Prisma.IntWithAggregatesFilter<"RoundGuess"> | number
   submittedAt?: Prisma.DateTimeWithAggregatesFilter<"RoundGuess"> | Date | string
 }
@@ -326,6 +338,7 @@ export type RoundGuessCreateInput = {
   songNameCorrect?: boolean
   placementPosition?: number | null
   placementCorrect?: boolean
+  isContest?: boolean
   pointsEarned?: number
   submittedAt?: Date | string
   round: Prisma.GameRoundCreateNestedOneWithoutGuessesInput
@@ -340,6 +353,7 @@ export type RoundGuessUncheckedCreateInput = {
   songNameCorrect?: boolean
   placementPosition?: number | null
   placementCorrect?: boolean
+  isContest?: boolean
   pointsEarned?: number
   submittedAt?: Date | string
 }
@@ -350,6 +364,7 @@ export type RoundGuessUpdateInput = {
   songNameCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean
   placementPosition?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   placementCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isContest?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pointsEarned?: Prisma.IntFieldUpdateOperationsInput | number
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   round?: Prisma.GameRoundUpdateOneRequiredWithoutGuessesNestedInput
@@ -364,6 +379,7 @@ export type RoundGuessUncheckedUpdateInput = {
   songNameCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean
   placementPosition?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   placementCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isContest?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pointsEarned?: Prisma.IntFieldUpdateOperationsInput | number
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -376,6 +392,7 @@ export type RoundGuessCreateManyInput = {
   songNameCorrect?: boolean
   placementPosition?: number | null
   placementCorrect?: boolean
+  isContest?: boolean
   pointsEarned?: number
   submittedAt?: Date | string
 }
@@ -386,6 +403,7 @@ export type RoundGuessUpdateManyMutationInput = {
   songNameCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean
   placementPosition?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   placementCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isContest?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pointsEarned?: Prisma.IntFieldUpdateOperationsInput | number
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -398,6 +416,7 @@ export type RoundGuessUncheckedUpdateManyInput = {
   songNameCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean
   placementPosition?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   placementCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isContest?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pointsEarned?: Prisma.IntFieldUpdateOperationsInput | number
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -425,6 +444,7 @@ export type RoundGuessCountOrderByAggregateInput = {
   songNameCorrect?: Prisma.SortOrder
   placementPosition?: Prisma.SortOrder
   placementCorrect?: Prisma.SortOrder
+  isContest?: Prisma.SortOrder
   pointsEarned?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
 }
@@ -442,6 +462,7 @@ export type RoundGuessMaxOrderByAggregateInput = {
   songNameCorrect?: Prisma.SortOrder
   placementPosition?: Prisma.SortOrder
   placementCorrect?: Prisma.SortOrder
+  isContest?: Prisma.SortOrder
   pointsEarned?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
 }
@@ -454,6 +475,7 @@ export type RoundGuessMinOrderByAggregateInput = {
   songNameCorrect?: Prisma.SortOrder
   placementPosition?: Prisma.SortOrder
   placementCorrect?: Prisma.SortOrder
+  isContest?: Prisma.SortOrder
   pointsEarned?: Prisma.SortOrder
   submittedAt?: Prisma.SortOrder
 }
@@ -561,6 +583,7 @@ export type RoundGuessCreateWithoutPlayerInput = {
   songNameCorrect?: boolean
   placementPosition?: number | null
   placementCorrect?: boolean
+  isContest?: boolean
   pointsEarned?: number
   submittedAt?: Date | string
   round: Prisma.GameRoundCreateNestedOneWithoutGuessesInput
@@ -573,6 +596,7 @@ export type RoundGuessUncheckedCreateWithoutPlayerInput = {
   songNameCorrect?: boolean
   placementPosition?: number | null
   placementCorrect?: boolean
+  isContest?: boolean
   pointsEarned?: number
   submittedAt?: Date | string
 }
@@ -614,6 +638,7 @@ export type RoundGuessScalarWhereInput = {
   songNameCorrect?: Prisma.BoolFilter<"RoundGuess"> | boolean
   placementPosition?: Prisma.IntNullableFilter<"RoundGuess"> | number | null
   placementCorrect?: Prisma.BoolFilter<"RoundGuess"> | boolean
+  isContest?: Prisma.BoolFilter<"RoundGuess"> | boolean
   pointsEarned?: Prisma.IntFilter<"RoundGuess"> | number
   submittedAt?: Prisma.DateTimeFilter<"RoundGuess"> | Date | string
 }
@@ -624,6 +649,7 @@ export type RoundGuessCreateWithoutRoundInput = {
   songNameCorrect?: boolean
   placementPosition?: number | null
   placementCorrect?: boolean
+  isContest?: boolean
   pointsEarned?: number
   submittedAt?: Date | string
   player: Prisma.PlayerCreateNestedOneWithoutRoundGuessesInput
@@ -636,6 +662,7 @@ export type RoundGuessUncheckedCreateWithoutRoundInput = {
   songNameCorrect?: boolean
   placementPosition?: number | null
   placementCorrect?: boolean
+  isContest?: boolean
   pointsEarned?: number
   submittedAt?: Date | string
 }
@@ -673,6 +700,7 @@ export type RoundGuessCreateManyPlayerInput = {
   songNameCorrect?: boolean
   placementPosition?: number | null
   placementCorrect?: boolean
+  isContest?: boolean
   pointsEarned?: number
   submittedAt?: Date | string
 }
@@ -683,6 +711,7 @@ export type RoundGuessUpdateWithoutPlayerInput = {
   songNameCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean
   placementPosition?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   placementCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isContest?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pointsEarned?: Prisma.IntFieldUpdateOperationsInput | number
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   round?: Prisma.GameRoundUpdateOneRequiredWithoutGuessesNestedInput
@@ -695,6 +724,7 @@ export type RoundGuessUncheckedUpdateWithoutPlayerInput = {
   songNameCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean
   placementPosition?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   placementCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isContest?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pointsEarned?: Prisma.IntFieldUpdateOperationsInput | number
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -706,6 +736,7 @@ export type RoundGuessUncheckedUpdateManyWithoutPlayerInput = {
   songNameCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean
   placementPosition?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   placementCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isContest?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pointsEarned?: Prisma.IntFieldUpdateOperationsInput | number
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -717,6 +748,7 @@ export type RoundGuessCreateManyRoundInput = {
   songNameCorrect?: boolean
   placementPosition?: number | null
   placementCorrect?: boolean
+  isContest?: boolean
   pointsEarned?: number
   submittedAt?: Date | string
 }
@@ -727,6 +759,7 @@ export type RoundGuessUpdateWithoutRoundInput = {
   songNameCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean
   placementPosition?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   placementCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isContest?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pointsEarned?: Prisma.IntFieldUpdateOperationsInput | number
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   player?: Prisma.PlayerUpdateOneRequiredWithoutRoundGuessesNestedInput
@@ -739,6 +772,7 @@ export type RoundGuessUncheckedUpdateWithoutRoundInput = {
   songNameCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean
   placementPosition?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   placementCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isContest?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pointsEarned?: Prisma.IntFieldUpdateOperationsInput | number
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -750,6 +784,7 @@ export type RoundGuessUncheckedUpdateManyWithoutRoundInput = {
   songNameCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean
   placementPosition?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   placementCorrect?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isContest?: Prisma.BoolFieldUpdateOperationsInput | boolean
   pointsEarned?: Prisma.IntFieldUpdateOperationsInput | number
   submittedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -764,6 +799,7 @@ export type RoundGuessSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   songNameCorrect?: boolean
   placementPosition?: boolean
   placementCorrect?: boolean
+  isContest?: boolean
   pointsEarned?: boolean
   submittedAt?: boolean
   round?: boolean | Prisma.GameRoundDefaultArgs<ExtArgs>
@@ -778,6 +814,7 @@ export type RoundGuessSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   songNameCorrect?: boolean
   placementPosition?: boolean
   placementCorrect?: boolean
+  isContest?: boolean
   pointsEarned?: boolean
   submittedAt?: boolean
   round?: boolean | Prisma.GameRoundDefaultArgs<ExtArgs>
@@ -792,6 +829,7 @@ export type RoundGuessSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   songNameCorrect?: boolean
   placementPosition?: boolean
   placementCorrect?: boolean
+  isContest?: boolean
   pointsEarned?: boolean
   submittedAt?: boolean
   round?: boolean | Prisma.GameRoundDefaultArgs<ExtArgs>
@@ -806,11 +844,12 @@ export type RoundGuessSelectScalar = {
   songNameCorrect?: boolean
   placementPosition?: boolean
   placementCorrect?: boolean
+  isContest?: boolean
   pointsEarned?: boolean
   submittedAt?: boolean
 }
 
-export type RoundGuessOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "roundId" | "playerId" | "songNameGuess" | "songNameCorrect" | "placementPosition" | "placementCorrect" | "pointsEarned" | "submittedAt", ExtArgs["result"]["roundGuess"]>
+export type RoundGuessOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "roundId" | "playerId" | "songNameGuess" | "songNameCorrect" | "placementPosition" | "placementCorrect" | "isContest" | "pointsEarned" | "submittedAt", ExtArgs["result"]["roundGuess"]>
 export type RoundGuessInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   round?: boolean | Prisma.GameRoundDefaultArgs<ExtArgs>
   player?: boolean | Prisma.PlayerDefaultArgs<ExtArgs>
@@ -838,6 +877,7 @@ export type $RoundGuessPayload<ExtArgs extends runtime.Types.Extensions.Internal
     songNameCorrect: boolean
     placementPosition: number | null
     placementCorrect: boolean
+    isContest: boolean
     pointsEarned: number
     submittedAt: Date
   }, ExtArgs["result"]["roundGuess"]>
@@ -1272,6 +1312,7 @@ export interface RoundGuessFieldRefs {
   readonly songNameCorrect: Prisma.FieldRef<"RoundGuess", 'Boolean'>
   readonly placementPosition: Prisma.FieldRef<"RoundGuess", 'Int'>
   readonly placementCorrect: Prisma.FieldRef<"RoundGuess", 'Boolean'>
+  readonly isContest: Prisma.FieldRef<"RoundGuess", 'Boolean'>
   readonly pointsEarned: Prisma.FieldRef<"RoundGuess", 'Int'>
   readonly submittedAt: Prisma.FieldRef<"RoundGuess", 'DateTime'>
 }

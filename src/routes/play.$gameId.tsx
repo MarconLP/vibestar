@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { useState, useEffect, useCallback } from 'react'
-import { getGame, getCurrentRound, startRound, submitSongGuess, submitPlacement, getPlayerTimeline, continueGame, contestPlacement } from '@/server/functions/game'
+import { getGame, getCurrentRound, startRound, submitSongGuess, submitPlacement, getPlayerTimeline, continueGame, submitContestGuess, revealResults } from '@/server/functions/game'
 import { useChannel } from '@/hooks/usePusher'
 import { Timeline } from '@/components/game/Timeline'
 import { YouTubePlayer } from '@/components/game/YouTubePlayer'
@@ -14,10 +14,11 @@ import type {
   GameRoundResultEvent,
   GameTurnChangeEvent,
   GameEndedEvent,
-  GameContestResultEvent,
+  GameContestWindowEvent,
+  GameContestSubmittedEvent,
 } from '@/lib/pusher/events'
 
-type GamePhase = 'WAITING' | 'PLAYING_CLIP' | 'GUESSING' | 'PLACING' | 'REVEALING' | 'GAME_OVER'
+type GamePhase = 'WAITING' | 'PLAYING_CLIP' | 'GUESSING' | 'PLACING' | 'CONTESTING' | 'REVEALING' | 'GAME_OVER'
 
 interface TimelineEntry {
   id: string
@@ -61,7 +62,16 @@ function GamePlay() {
   const [gameResult, setGameResult] = useState<GameEndedEvent | null>(null)
   const [guessSubmitted, setGuessSubmitted] = useState(false)
   const [myTokens, setMyTokens] = useState(player?.tokens ?? 0)
-  const [isContesting, setIsContesting] = useState(false)
+  const [contestSubmitted, setContestSubmitted] = useState(false)
+
+  // Contest window state
+  const [contestWindow, setContestWindow] = useState<{
+    currentPlayerTimeline: Array<{ id: string; position: number; song: { name: string; artist: string; releaseYear: number } }>
+    placementPosition: number
+    deadline: number
+  } | null>(null)
+  const [contestTimeRemaining, setContestTimeRemaining] = useState(0)
+  const [contestSubmissions, setContestSubmissions] = useState<Array<{ contesterId: string; contesterName: string; position: number }>>([])
 
   const isMyTurn = currentPlayerId === player?.id
 
@@ -71,6 +81,29 @@ function GamePlay() {
     const updated = await getPlayerTimeline({ data: { playerId: player.id } })
     setTimeline(updated as TimelineEntry[])
   }, [player])
+
+  // Contest window countdown - auto-reveal when timer ends
+  useEffect(() => {
+    if (!contestWindow) return
+
+    const timer = setInterval(() => {
+      const remaining = Math.max(0, Math.ceil((contestWindow.deadline - Date.now()) / 1000))
+      setContestTimeRemaining(remaining)
+
+      // Auto-reveal when timer hits 0 (only current player triggers this)
+      if (remaining === 0 && isMyTurn && currentRound) {
+        clearInterval(timer)
+        revealResults({
+          data: {
+            gameId: game.id,
+            roundId: currentRound.roundId,
+          },
+        })
+      }
+    }, 100)
+
+    return () => clearInterval(timer)
+  }, [contestWindow, isMyTurn, currentRound, game.id])
 
   // Subscribe to game events
   const { bind, unbind } = useChannel(`private-game-${game.id}`)
@@ -96,10 +129,43 @@ function GamePlay() {
       setPhase(data.phase)
     })
 
+    bind<GameContestWindowEvent>('game:contest-window', (data) => {
+      setContestWindow({
+        currentPlayerTimeline: data.currentPlayerTimeline,
+        placementPosition: data.placementPosition,
+        deadline: data.contestDeadline,
+      })
+      setContestTimeRemaining(Math.ceil((data.contestDeadline - Date.now()) / 1000))
+      setContestSubmissions([])
+      setContestSubmitted(false)
+    })
+
+    bind<GameContestSubmittedEvent>('game:contest-submitted', (data) => {
+      setContestSubmissions((prev) => [...prev, {
+        contesterId: data.contesterId,
+        contesterName: data.contesterName,
+        position: data.position,
+      }])
+
+      // Update contester's token count
+      setPlayers((prev) =>
+        prev.map((p) =>
+          p.id === data.contesterId
+            ? { ...p, tokens: data.newTokenCount }
+            : p
+        )
+      )
+
+      // If I was the contester, sync my tokens
+      if (data.contesterId === player?.id) {
+        setMyTokens(data.newTokenCount)
+      }
+    })
+
     bind<GameRoundResultEvent>('game:round-result', (data) => {
       setRoundResult(data)
       setPhase('REVEALING')
-      setIsContesting(false)
+      setContestWindow(null)
 
       // Update player scores and tokens (synced across all clients)
       setPlayers((prev) =>
@@ -114,25 +180,9 @@ function GamePlay() {
       if (data.playerId === player?.id) {
         setMyTokens(data.playerTokens)
       }
-    })
 
-    bind<GameContestResultEvent>('game:contest-result', (data) => {
-      // Update contester's score and tokens (synced across all clients)
-      setPlayers((prev) =>
-        prev.map((p) =>
-          p.id === data.contesterId
-            ? { ...p, score: data.success ? data.newTimelineCount : p.score, tokens: data.newTokenCount }
-            : p
-        )
-      )
-
-      // If I was the contester, sync my tokens and timeline
-      if (data.contesterId === player?.id) {
-        setMyTokens(data.newTokenCount)
-        if (data.success) {
-          refreshTimeline()
-        }
-      }
+      // Refresh timeline for everyone who might have gotten a song
+      refreshTimeline()
     })
 
     bind<GameTurnChangeEvent>('game:turn-change', (data) => {
@@ -150,8 +200,9 @@ function GamePlay() {
     return () => {
       unbind('game:round-start')
       unbind('game:round-phase')
+      unbind('game:contest-window')
+      unbind('game:contest-submitted')
       unbind('game:round-result')
-      unbind('game:contest-result')
       unbind('game:turn-change')
       unbind('game:ended')
     }
@@ -215,15 +266,15 @@ function GamePlay() {
     setRoundResult(null)
   }
 
-  // Handle contesting a placement
-  const handleContest = async (position: number) => {
+  // Handle submitting a contest guess
+  const handleContestSubmit = async (position: number) => {
     if (!currentRound) return
-    setIsContesting(false)
+    setContestSubmitted(true)
 
     // Spend token locally immediately for responsive UI
     setMyTokens((prev) => prev - 1)
 
-    await contestPlacement({
+    await submitContestGuess({
       data: {
         gameId: game.id,
         roundId: currentRound.roundId,
@@ -232,14 +283,16 @@ function GamePlay() {
     })
   }
 
-  // Start contest mode (show timeline for placement)
-  const handleStartContest = () => {
-    setIsContesting(true)
-  }
+  // Handle revealing results (current player only, after contest window)
+  const handleRevealResults = async () => {
+    if (!currentRound) return
 
-  // Cancel contest
-  const handleCancelContest = () => {
-    setIsContesting(false)
+    await revealResults({
+      data: {
+        gameId: game.id,
+        roundId: currentRound.roundId,
+      },
+    })
   }
 
   if (phase === 'GAME_OVER' && gameResult) {
@@ -329,42 +382,112 @@ function GamePlay() {
                 </div>
               )}
 
+              {/* Contest Window - other players can place on current player's timeline */}
+              {phase === 'CONTESTING' && contestWindow && (
+                <div className="p-6 rounded-2xl bg-neutral-900/50 border border-yellow-500/30 backdrop-blur-sm">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-bold text-yellow-400">
+                      {isMyTurn ? 'Waiting for contests...' : 'Contest Window!'}
+                    </h2>
+                    <div className="px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-400 font-bold">
+                      {contestTimeRemaining}s
+                    </div>
+                  </div>
+
+                  {isMyTurn ? (
+                    // Current player sees their timeline and waits
+                    <div>
+                      <p className="text-neutral-400 mb-4">
+                        Other players can contest your placement. You placed the song at position {contestWindow.placementPosition + 1}.
+                      </p>
+                      {contestSubmissions.length > 0 && (
+                        <div className="mb-4 p-3 rounded-xl bg-neutral-800/50">
+                          <p className="text-sm text-neutral-400 mb-2">Contests submitted:</p>
+                          {contestSubmissions.map((sub) => (
+                            <p key={sub.contesterId} className="text-white">
+                              {sub.contesterName} placed at position {sub.position + 1}
+                            </p>
+                          ))}
+                        </div>
+                      )}
+                      <Timeline
+                        entries={contestWindow.currentPlayerTimeline.map((e, i) => ({
+                          ...e,
+                          song: { ...e.song, id: `temp-${i}`, thumbnailUrl: null },
+                        }))}
+                        placingMode={false}
+                        guessPosition={contestWindow.placementPosition}
+                      />
+                      {contestTimeRemaining === 0 && (
+                        <button
+                          onClick={handleRevealResults}
+                          className="mt-4 w-full py-3 px-4 rounded-xl font-semibold bg-green-500 text-black transition-all duration-200 hover:bg-green-400 hover:scale-[1.02] active:scale-[0.98]"
+                        >
+                          Reveal Results
+                        </button>
+                      )}
+                    </div>
+                  ) : (
+                    // Other players can contest
+                    <div>
+                      <p className="text-neutral-400 mb-4">
+                        {currentPlayerName} placed the song at position {contestWindow.placementPosition + 1}.
+                        {myTokens > 0 && !contestSubmitted && ' Spend a token to contest with your own placement!'}
+                      </p>
+                      {contestSubmitted ? (
+                        <div className="p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/30 text-center">
+                          <p className="text-yellow-400 font-medium">Contest submitted! Waiting for results...</p>
+                        </div>
+                      ) : myTokens > 0 ? (
+                        <>
+                          <p className="text-sm text-neutral-500 mb-4">
+                            Click where YOU think the song belongs on {currentPlayerName}'s timeline:
+                          </p>
+                          <Timeline
+                            entries={contestWindow.currentPlayerTimeline.map((e, i) => ({
+                              ...e,
+                              song: { ...e.song, id: `temp-${i}`, thumbnailUrl: null },
+                            }))}
+                            placingMode={true}
+                            onPlacement={handleContestSubmit}
+                            blockedPosition={contestWindow.placementPosition}
+                            guessPosition={contestWindow.placementPosition}
+                          />
+                          <p className="text-xs text-neutral-500 mt-2 text-center">
+                            You have {myTokens} token{myTokens !== 1 ? 's' : ''}. This will cost 1 token.
+                          </p>
+                        </>
+                      ) : (
+                        <div className="p-4 rounded-xl bg-neutral-800/50 text-center">
+                          <p className="text-neutral-400">No tokens to contest. Waiting for results...</p>
+                          <Timeline
+                            entries={contestWindow.currentPlayerTimeline.map((e, i) => ({
+                              ...e,
+                              song: { ...e.song, id: `temp-${i}`, thumbnailUrl: null },
+                            }))}
+                            placingMode={false}
+                            guessPosition={contestWindow.placementPosition}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* Revealing Result */}
-              {phase === 'REVEALING' && roundResult && !isContesting && (
+              {phase === 'REVEALING' && roundResult && (
                 <RoundResult
                   result={roundResult}
                   isMyTurn={roundResult.playerId === player?.id}
                   onContinue={handleContinue}
                   myTokens={myTokens}
-                  onStartContest={handleStartContest}
+                  otherPlayersCount={players.length - 1}
                 />
               )}
 
-              {/* Contest Mode - placing song on own timeline */}
-              {phase === 'REVEALING' && isContesting && roundResult && (
-                <div className="p-6 rounded-2xl bg-neutral-900/50 border border-yellow-500/30 backdrop-blur-sm">
-                  <h2 className="text-xl font-bold text-yellow-400 mb-2">
-                    Contest! Place the song on YOUR timeline
-                  </h2>
-                  <p className="text-neutral-400 mb-4">
-                    {roundResult.actualSong.name} by {roundResult.actualSong.artist} ({roundResult.actualSong.releaseYear})
-                  </p>
-                  <Timeline
-                    entries={timeline}
-                    placingMode={true}
-                    onPlacement={handleContest}
-                  />
-                  <button
-                    onClick={handleCancelContest}
-                    className="mt-4 px-4 py-2 rounded-lg text-neutral-400 hover:text-white transition-colors"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              )}
-
               {/* Watching other player */}
-              {!isMyTurn && phase !== 'WAITING' && phase !== 'REVEALING' && (
+              {!isMyTurn && phase !== 'WAITING' && phase !== 'CONTESTING' && phase !== 'REVEALING' && (
                 <div className="p-8 rounded-2xl bg-neutral-900/50 border border-white/10 backdrop-blur-sm text-center">
                   <p className="text-neutral-400 text-lg">
                     {currentPlayerName} is {phase === 'PLAYING_CLIP' ? 'listening to the clip' : phase === 'GUESSING' ? 'guessing the song' : 'placing on their timeline'}...

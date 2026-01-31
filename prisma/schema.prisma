@@ -166,8 +166,9 @@ model GameRound {
 
   status RoundStatus @default(PENDING)
 
-  startedAt DateTime?
-  endedAt   DateTime?
+  startedAt       DateTime?
+  endedAt         DateTime?
+  contestDeadline DateTime? // When the contest window ends
 
   guesses RoundGuess[]
 
@@ -202,6 +203,7 @@ model RoundGuess {
   // Timeline placement guess
   placementPosition Int?
   placementCorrect  Boolean @default(false)
+  isContest         Boolean @default(false) // True if this is a contest guess from another player
 
   pointsEarned Int @default(0)
 

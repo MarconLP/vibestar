@@ -48,6 +48,7 @@ export type GameRoundMinAggregateOutputType = {
   status: $Enums.RoundStatus | null
   startedAt: Date | null
   endedAt: Date | null
+  contestDeadline: Date | null
 }
 
 export type GameRoundMaxAggregateOutputType = {
@@ -60,6 +61,7 @@ export type GameRoundMaxAggregateOutputType = {
   status: $Enums.RoundStatus | null
   startedAt: Date | null
   endedAt: Date | null
+  contestDeadline: Date | null
 }
 
 export type GameRoundCountAggregateOutputType = {
@@ -72,6 +74,7 @@ export type GameRoundCountAggregateOutputType = {
   status: number
   startedAt: number
   endedAt: number
+  contestDeadline: number
   _all: number
 }
 
@@ -98,6 +101,7 @@ export type GameRoundMinAggregateInputType = {
   status?: true
   startedAt?: true
   endedAt?: true
+  contestDeadline?: true
 }
 
 export type GameRoundMaxAggregateInputType = {
@@ -110,6 +114,7 @@ export type GameRoundMaxAggregateInputType = {
   status?: true
   startedAt?: true
   endedAt?: true
+  contestDeadline?: true
 }
 
 export type GameRoundCountAggregateInputType = {
@@ -122,6 +127,7 @@ export type GameRoundCountAggregateInputType = {
   status?: true
   startedAt?: true
   endedAt?: true
+  contestDeadline?: true
   _all?: true
 }
 
@@ -221,6 +227,7 @@ export type GameRoundGroupByOutputType = {
   status: $Enums.RoundStatus
   startedAt: Date | null
   endedAt: Date | null
+  contestDeadline: Date | null
   _count: GameRoundCountAggregateOutputType | null
   _avg: GameRoundAvgAggregateOutputType | null
   _sum: GameRoundSumAggregateOutputType | null
@@ -256,6 +263,7 @@ export type GameRoundWhereInput = {
   status?: Prisma.EnumRoundStatusFilter<"GameRound"> | $Enums.RoundStatus
   startedAt?: Prisma.DateTimeNullableFilter<"GameRound"> | Date | string | null
   endedAt?: Prisma.DateTimeNullableFilter<"GameRound"> | Date | string | null
+  contestDeadline?: Prisma.DateTimeNullableFilter<"GameRound"> | Date | string | null
   game?: Prisma.XOR<Prisma.GameScalarRelationFilter, Prisma.GameWhereInput>
   song?: Prisma.XOR<Prisma.SongScalarRelationFilter, Prisma.SongWhereInput>
   guesses?: Prisma.RoundGuessListRelationFilter
@@ -271,6 +279,7 @@ export type GameRoundOrderByWithRelationInput = {
   status?: Prisma.SortOrder
   startedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   endedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  contestDeadline?: Prisma.SortOrderInput | Prisma.SortOrder
   game?: Prisma.GameOrderByWithRelationInput
   song?: Prisma.SongOrderByWithRelationInput
   guesses?: Prisma.RoundGuessOrderByRelationAggregateInput
@@ -290,6 +299,7 @@ export type GameRoundWhereUniqueInput = Prisma.AtLeast<{
   status?: Prisma.EnumRoundStatusFilter<"GameRound"> | $Enums.RoundStatus
   startedAt?: Prisma.DateTimeNullableFilter<"GameRound"> | Date | string | null
   endedAt?: Prisma.DateTimeNullableFilter<"GameRound"> | Date | string | null
+  contestDeadline?: Prisma.DateTimeNullableFilter<"GameRound"> | Date | string | null
   game?: Prisma.XOR<Prisma.GameScalarRelationFilter, Prisma.GameWhereInput>
   song?: Prisma.XOR<Prisma.SongScalarRelationFilter, Prisma.SongWhereInput>
   guesses?: Prisma.RoundGuessListRelationFilter
@@ -305,6 +315,7 @@ export type GameRoundOrderByWithAggregationInput = {
   status?: Prisma.SortOrder
   startedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   endedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  contestDeadline?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.GameRoundCountOrderByAggregateInput
   _avg?: Prisma.GameRoundAvgOrderByAggregateInput
   _max?: Prisma.GameRoundMaxOrderByAggregateInput
@@ -325,6 +336,7 @@ export type GameRoundScalarWhereWithAggregatesInput = {
   status?: Prisma.EnumRoundStatusWithAggregatesFilter<"GameRound"> | $Enums.RoundStatus
   startedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"GameRound"> | Date | string | null
   endedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"GameRound"> | Date | string | null
+  contestDeadline?: Prisma.DateTimeNullableWithAggregatesFilter<"GameRound"> | Date | string | null
 }
 
 export type GameRoundCreateInput = {
@@ -335,6 +347,7 @@ export type GameRoundCreateInput = {
   status?: $Enums.RoundStatus
   startedAt?: Date | string | null
   endedAt?: Date | string | null
+  contestDeadline?: Date | string | null
   game: Prisma.GameCreateNestedOneWithoutRoundsInput
   song: Prisma.SongCreateNestedOneWithoutGameRoundsInput
   guesses?: Prisma.RoundGuessCreateNestedManyWithoutRoundInput
@@ -350,6 +363,7 @@ export type GameRoundUncheckedCreateInput = {
   status?: $Enums.RoundStatus
   startedAt?: Date | string | null
   endedAt?: Date | string | null
+  contestDeadline?: Date | string | null
   guesses?: Prisma.RoundGuessUncheckedCreateNestedManyWithoutRoundInput
 }
 
@@ -361,6 +375,7 @@ export type GameRoundUpdateInput = {
   status?: Prisma.EnumRoundStatusFieldUpdateOperationsInput | $Enums.RoundStatus
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contestDeadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   game?: Prisma.GameUpdateOneRequiredWithoutRoundsNestedInput
   song?: Prisma.SongUpdateOneRequiredWithoutGameRoundsNestedInput
   guesses?: Prisma.RoundGuessUpdateManyWithoutRoundNestedInput
@@ -376,6 +391,7 @@ export type GameRoundUncheckedUpdateInput = {
   status?: Prisma.EnumRoundStatusFieldUpdateOperationsInput | $Enums.RoundStatus
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contestDeadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   guesses?: Prisma.RoundGuessUncheckedUpdateManyWithoutRoundNestedInput
 }
 
@@ -389,6 +405,7 @@ export type GameRoundCreateManyInput = {
   status?: $Enums.RoundStatus
   startedAt?: Date | string | null
   endedAt?: Date | string | null
+  contestDeadline?: Date | string | null
 }
 
 export type GameRoundUpdateManyMutationInput = {
@@ -399,6 +416,7 @@ export type GameRoundUpdateManyMutationInput = {
   status?: Prisma.EnumRoundStatusFieldUpdateOperationsInput | $Enums.RoundStatus
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contestDeadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type GameRoundUncheckedUpdateManyInput = {
@@ -411,6 +429,7 @@ export type GameRoundUncheckedUpdateManyInput = {
   status?: Prisma.EnumRoundStatusFieldUpdateOperationsInput | $Enums.RoundStatus
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contestDeadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type GameRoundListRelationFilter = {
@@ -438,6 +457,7 @@ export type GameRoundCountOrderByAggregateInput = {
   status?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   endedAt?: Prisma.SortOrder
+  contestDeadline?: Prisma.SortOrder
 }
 
 export type GameRoundAvgOrderByAggregateInput = {
@@ -456,6 +476,7 @@ export type GameRoundMaxOrderByAggregateInput = {
   status?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   endedAt?: Prisma.SortOrder
+  contestDeadline?: Prisma.SortOrder
 }
 
 export type GameRoundMinOrderByAggregateInput = {
@@ -468,6 +489,7 @@ export type GameRoundMinOrderByAggregateInput = {
   status?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   endedAt?: Prisma.SortOrder
+  contestDeadline?: Prisma.SortOrder
 }
 
 export type GameRoundSumOrderByAggregateInput = {
@@ -591,6 +613,7 @@ export type GameRoundCreateWithoutSongInput = {
   status?: $Enums.RoundStatus
   startedAt?: Date | string | null
   endedAt?: Date | string | null
+  contestDeadline?: Date | string | null
   game: Prisma.GameCreateNestedOneWithoutRoundsInput
   guesses?: Prisma.RoundGuessCreateNestedManyWithoutRoundInput
 }
@@ -604,6 +627,7 @@ export type GameRoundUncheckedCreateWithoutSongInput = {
   status?: $Enums.RoundStatus
   startedAt?: Date | string | null
   endedAt?: Date | string | null
+  contestDeadline?: Date | string | null
   guesses?: Prisma.RoundGuessUncheckedCreateNestedManyWithoutRoundInput
 }
 
@@ -646,6 +670,7 @@ export type GameRoundScalarWhereInput = {
   status?: Prisma.EnumRoundStatusFilter<"GameRound"> | $Enums.RoundStatus
   startedAt?: Prisma.DateTimeNullableFilter<"GameRound"> | Date | string | null
   endedAt?: Prisma.DateTimeNullableFilter<"GameRound"> | Date | string | null
+  contestDeadline?: Prisma.DateTimeNullableFilter<"GameRound"> | Date | string | null
 }
 
 export type GameRoundCreateWithoutGameInput = {
@@ -656,6 +681,7 @@ export type GameRoundCreateWithoutGameInput = {
   status?: $Enums.RoundStatus
   startedAt?: Date | string | null
   endedAt?: Date | string | null
+  contestDeadline?: Date | string | null
   song: Prisma.SongCreateNestedOneWithoutGameRoundsInput
   guesses?: Prisma.RoundGuessCreateNestedManyWithoutRoundInput
 }
@@ -669,6 +695,7 @@ export type GameRoundUncheckedCreateWithoutGameInput = {
   status?: $Enums.RoundStatus
   startedAt?: Date | string | null
   endedAt?: Date | string | null
+  contestDeadline?: Date | string | null
   guesses?: Prisma.RoundGuessUncheckedCreateNestedManyWithoutRoundInput
 }
 
@@ -706,6 +733,7 @@ export type GameRoundCreateWithoutGuessesInput = {
   status?: $Enums.RoundStatus
   startedAt?: Date | string | null
   endedAt?: Date | string | null
+  contestDeadline?: Date | string | null
   game: Prisma.GameCreateNestedOneWithoutRoundsInput
   song: Prisma.SongCreateNestedOneWithoutGameRoundsInput
 }
@@ -720,6 +748,7 @@ export type GameRoundUncheckedCreateWithoutGuessesInput = {
   status?: $Enums.RoundStatus
   startedAt?: Date | string | null
   endedAt?: Date | string | null
+  contestDeadline?: Date | string | null
 }
 
 export type GameRoundCreateOrConnectWithoutGuessesInput = {
@@ -746,6 +775,7 @@ export type GameRoundUpdateWithoutGuessesInput = {
   status?: Prisma.EnumRoundStatusFieldUpdateOperationsInput | $Enums.RoundStatus
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contestDeadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   game?: Prisma.GameUpdateOneRequiredWithoutRoundsNestedInput
   song?: Prisma.SongUpdateOneRequiredWithoutGameRoundsNestedInput
 }
@@ -760,6 +790,7 @@ export type GameRoundUncheckedUpdateWithoutGuessesInput = {
   status?: Prisma.EnumRoundStatusFieldUpdateOperationsInput | $Enums.RoundStatus
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contestDeadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type GameRoundCreateManySongInput = {
@@ -771,6 +802,7 @@ export type GameRoundCreateManySongInput = {
   status?: $Enums.RoundStatus
   startedAt?: Date | string | null
   endedAt?: Date | string | null
+  contestDeadline?: Date | string | null
 }
 
 export type GameRoundUpdateWithoutSongInput = {
@@ -781,6 +813,7 @@ export type GameRoundUpdateWithoutSongInput = {
   status?: Prisma.EnumRoundStatusFieldUpdateOperationsInput | $Enums.RoundStatus
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contestDeadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   game?: Prisma.GameUpdateOneRequiredWithoutRoundsNestedInput
   guesses?: Prisma.RoundGuessUpdateManyWithoutRoundNestedInput
 }
@@ -794,6 +827,7 @@ export type GameRoundUncheckedUpdateWithoutSongInput = {
   status?: Prisma.EnumRoundStatusFieldUpdateOperationsInput | $Enums.RoundStatus
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contestDeadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   guesses?: Prisma.RoundGuessUncheckedUpdateManyWithoutRoundNestedInput
 }
 
@@ -806,6 +840,7 @@ export type GameRoundUncheckedUpdateManyWithoutSongInput = {
   status?: Prisma.EnumRoundStatusFieldUpdateOperationsInput | $Enums.RoundStatus
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contestDeadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type GameRoundCreateManyGameInput = {
@@ -817,6 +852,7 @@ export type GameRoundCreateManyGameInput = {
   status?: $Enums.RoundStatus
   startedAt?: Date | string | null
   endedAt?: Date | string | null
+  contestDeadline?: Date | string | null
 }
 
 export type GameRoundUpdateWithoutGameInput = {
@@ -827,6 +863,7 @@ export type GameRoundUpdateWithoutGameInput = {
   status?: Prisma.EnumRoundStatusFieldUpdateOperationsInput | $Enums.RoundStatus
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contestDeadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   song?: Prisma.SongUpdateOneRequiredWithoutGameRoundsNestedInput
   guesses?: Prisma.RoundGuessUpdateManyWithoutRoundNestedInput
 }
@@ -840,6 +877,7 @@ export type GameRoundUncheckedUpdateWithoutGameInput = {
   status?: Prisma.EnumRoundStatusFieldUpdateOperationsInput | $Enums.RoundStatus
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contestDeadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   guesses?: Prisma.RoundGuessUncheckedUpdateManyWithoutRoundNestedInput
 }
 
@@ -852,6 +890,7 @@ export type GameRoundUncheckedUpdateManyWithoutGameInput = {
   status?: Prisma.EnumRoundStatusFieldUpdateOperationsInput | $Enums.RoundStatus
   startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   endedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  contestDeadline?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -895,6 +934,7 @@ export type GameRoundSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   status?: boolean
   startedAt?: boolean
   endedAt?: boolean
+  contestDeadline?: boolean
   game?: boolean | Prisma.GameDefaultArgs<ExtArgs>
   song?: boolean | Prisma.SongDefaultArgs<ExtArgs>
   guesses?: boolean | Prisma.GameRound$guessesArgs<ExtArgs>
@@ -911,6 +951,7 @@ export type GameRoundSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   status?: boolean
   startedAt?: boolean
   endedAt?: boolean
+  contestDeadline?: boolean
   game?: boolean | Prisma.GameDefaultArgs<ExtArgs>
   song?: boolean | Prisma.SongDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["gameRound"]>
@@ -925,6 +966,7 @@ export type GameRoundSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   status?: boolean
   startedAt?: boolean
   endedAt?: boolean
+  contestDeadline?: boolean
   game?: boolean | Prisma.GameDefaultArgs<ExtArgs>
   song?: boolean | Prisma.SongDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["gameRound"]>
@@ -939,9 +981,10 @@ export type GameRoundSelectScalar = {
   status?: boolean
   startedAt?: boolean
   endedAt?: boolean
+  contestDeadline?: boolean
 }
 
-export type GameRoundOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "gameId" | "roundNumber" | "songId" | "clipStartTime" | "clipEndTime" | "status" | "startedAt" | "endedAt", ExtArgs["result"]["gameRound"]>
+export type GameRoundOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "gameId" | "roundNumber" | "songId" | "clipStartTime" | "clipEndTime" | "status" | "startedAt" | "endedAt" | "contestDeadline", ExtArgs["result"]["gameRound"]>
 export type GameRoundInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   game?: boolean | Prisma.GameDefaultArgs<ExtArgs>
   song?: boolean | Prisma.SongDefaultArgs<ExtArgs>
@@ -974,6 +1017,7 @@ export type $GameRoundPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     status: $Enums.RoundStatus
     startedAt: Date | null
     endedAt: Date | null
+    contestDeadline: Date | null
   }, ExtArgs["result"]["gameRound"]>
   composites: {}
 }
@@ -1409,6 +1453,7 @@ export interface GameRoundFieldRefs {
   readonly status: Prisma.FieldRef<"GameRound", 'RoundStatus'>
   readonly startedAt: Prisma.FieldRef<"GameRound", 'DateTime'>
   readonly endedAt: Prisma.FieldRef<"GameRound", 'DateTime'>
+  readonly contestDeadline: Prisma.FieldRef<"GameRound", 'DateTime'>
 }
     
 
