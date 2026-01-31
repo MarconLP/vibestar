@@ -479,10 +479,8 @@ export const submitPlacement = createServerFn({
       },
     } satisfies GameRoundResultEvent)
 
-    // Advance to next turn/round
-    await advanceGame(data.gameId, round.roundNumber)
-
-    return { isCorrect, points }
+    // Don't auto-advance - wait for player to click continue
+    return { isCorrect, points, roundNumber: round.roundNumber }
   })
 
 // Advance the game to next turn or end
@@ -567,6 +565,42 @@ async function advanceGame(gameId: string, currentRoundNumber: number) {
     } satisfies GameTurnChangeEvent)
   }
 }
+
+// Continue to next turn (called after viewing result)
+export const continueGame = createServerFn({
+  method: 'POST',
+})
+  .inputValidator((data: { gameId: string; roundNumber: number }) => data)
+  .handler(async ({ data }) => {
+    const session = await getSession()
+    if (!session?.user) {
+      throw new Error('Unauthorized')
+    }
+
+    const game = await prisma.game.findUnique({
+      where: { id: data.gameId },
+      include: {
+        room: {
+          include: { players: true },
+        },
+      },
+    })
+
+    if (!game) {
+      throw new Error('Game not found')
+    }
+
+    // Only the current player can continue
+    const player = game.room.players.find((p) => p.userId === session.user.id)
+    if (!player || game.currentPlayerId !== player.id) {
+      throw new Error('Not your turn')
+    }
+
+    // Advance the game
+    await advanceGame(data.gameId, data.roundNumber)
+
+    return { success: true }
+  })
 
 // Get player's timeline
 export const getPlayerTimeline = createServerFn({

@@ -97,17 +97,23 @@ export function RoundResult({ result, isMyTurn, onContinue }: RoundResultProps) 
         </p>
       </div>
 
-      {/* Continue Button */}
-      <button
-        onClick={onContinue}
-        className="w-full py-3 px-4 rounded-xl font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-        style={{
-          background: 'linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%)',
-          color: 'white',
-        }}
-      >
-        Continue
-      </button>
+      {/* Continue Button - only for the player whose turn it was */}
+      {isMyTurn ? (
+        <button
+          onClick={onContinue}
+          className="w-full py-3 px-4 rounded-xl font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+          style={{
+            background: 'linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%)',
+            color: 'white',
+          }}
+        >
+          Continue
+        </button>
+      ) : (
+        <p className="text-center text-gray-400">
+          Waiting for player to continue...
+        </p>
+      )}
     </div>
   )
 }

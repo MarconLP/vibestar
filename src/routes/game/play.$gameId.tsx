@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { useState, useEffect, useCallback } from 'react'
-import { getGame, getCurrentRound, startRound, submitSongGuess, submitPlacement, getPlayerTimeline } from '@/server/functions/game'
+import { getGame, getCurrentRound, startRound, submitSongGuess, submitPlacement, getPlayerTimeline, continueGame } from '@/server/functions/game'
 import { useChannel } from '@/hooks/usePusher'
 import { Timeline } from '@/components/game/Timeline'
 import { YouTubePlayer } from '@/components/game/YouTubePlayer'
@@ -172,7 +172,16 @@ function GamePlay() {
   }
 
   // Handle continuing after result reveal
-  const handleContinue = () => {
+  const handleContinue = async () => {
+    if (!currentRound) return
+
+    await continueGame({
+      data: {
+        gameId: game.id,
+        roundNumber: currentRoundNumber,
+      },
+    })
+
     setPhase('WAITING')
     setRoundResult(null)
   }
