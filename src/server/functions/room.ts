@@ -29,7 +29,7 @@ export const createRoom = createServerFn({
         code,
         hostId: session.user.id,
         clipDuration: data.clipDuration ?? 15,
-        maxPlayers: data.maxPlayers ?? 4,
+        maxPlayers: data.maxPlayers ?? 10,
         expiresAt,
         players: {
           create: {

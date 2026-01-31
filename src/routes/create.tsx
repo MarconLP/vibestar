@@ -15,7 +15,6 @@ function CreateGame() {
   const [isCreating, setIsCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [clipDuration, setClipDuration] = useState(15)
-  const [maxPlayers, setMaxPlayers] = useState(4)
 
   const handleCreate = async () => {
     if (!displayName.trim()) {
@@ -39,7 +38,7 @@ function CreateGame() {
 
       // Create the room
       const room = await createRoom({
-        data: { clipDuration, maxPlayers },
+        data: { clipDuration },
       })
       navigate({ to: '/room/$code', params: { code: room.code } })
     } catch (err) {
@@ -107,27 +106,6 @@ function CreateGame() {
                   <span>10s</span>
                   <span className="text-green-400 font-medium">{clipDuration}s</span>
                   <span>30s</span>
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-neutral-300 mb-2">
-                  Max Players
-                </label>
-                <div className="flex gap-2">
-                  {[2, 3, 4, 5, 6].map((num) => (
-                    <button
-                      key={num}
-                      onClick={() => setMaxPlayers(num)}
-                      className={`flex-1 py-2 rounded-xl font-medium transition-all ${
-                        maxPlayers === num
-                          ? 'bg-green-500 text-black'
-                          : 'bg-neutral-800 text-neutral-400 hover:bg-neutral-700 border border-white/5'
-                      }`}
-                    >
-                      {num}
-                    </button>
-                  ))}
                 </div>
               </div>
 
