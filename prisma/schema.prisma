@@ -12,3 +12,201 @@ model Todo {
   title     String
   createdAt DateTime @default(now())
 }
+
+// ============= GAME MODELS =============
+
+// Playlist imported from YouTube Music
+model Playlist {
+  id           String   @id @default(cuid())
+  youtubeId    String   @unique
+  name         String
+  thumbnailUrl String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  songs Song[]
+  games Game[]
+}
+
+// Individual song from a playlist
+model Song {
+  id             String   @id @default(cuid())
+  youtubeVideoId String   @unique
+  name           String
+  artist         String
+  releaseYear    Int
+  thumbnailUrl   String?
+  duration       Int // Duration in seconds
+
+  playlistId String
+  playlist   Playlist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  timelineEntries TimelineEntry[]
+  gameRounds      GameRound[]
+
+  @@index([playlistId])
+  @@index([releaseYear])
+}
+
+// Game room for multiplayer
+model GameRoom {
+  id     String     @id @default(cuid())
+  code   String     @unique // 6-char shareable code
+  status GameStatus @default(WAITING)
+  hostId String // User ID of the host
+
+  maxPlayers   Int @default(4)
+  clipDuration Int @default(15) // Clip length in seconds (10-30)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  expiresAt DateTime // Room expires after inactivity
+
+  game    Game?
+  players Player[]
+
+  @@index([code])
+  @@index([status])
+}
+
+enum GameStatus {
+  WAITING // Waiting for players to join
+  STARTING // Game is about to start
+  ACTIVE // Game in progress
+  FINISHED // Game completed
+  ABANDONED // Room abandoned/expired
+}
+
+// Active game session
+model Game {
+  id String @id @default(cuid())
+
+  roomId String   @unique
+  room   GameRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  playlistId String
+  playlist   Playlist @relation(fields: [playlistId], references: [id])
+
+  currentRound Int @default(0)
+  totalRounds  Int // Number of rounds to play
+
+  currentPlayerId String? // ID of player whose turn it is
+
+  status GameStatus @default(ACTIVE)
+
+  startedAt DateTime  @default(now())
+  endedAt   DateTime?
+
+  rounds GameRound[]
+
+  @@index([roomId])
+}
+
+// Player in a game room
+model Player {
+  id String @id @default(cuid())
+
+  userId      String // From better-auth
+  displayName String
+  avatarUrl   String?
+
+  roomId String
+  room   GameRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  score   Int     @default(0)
+  isHost  Boolean @default(false)
+  isReady Boolean @default(false)
+
+  joinedAt DateTime @default(now())
+
+  timeline     TimelineEntry[]
+  roundGuesses RoundGuess[]
+
+  @@unique([userId, roomId])
+  @@index([roomId])
+  @@index([userId])
+}
+
+// Song placed on a player's timeline
+model TimelineEntry {
+  id String @id @default(cuid())
+
+  playerId String
+  player   Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  songId String
+  song   Song   @relation(fields: [songId], references: [id])
+
+  position     Int // Order on timeline (0-indexed)
+  addedInRound Int // Which round this was added
+
+  createdAt DateTime @default(now())
+
+  @@unique([playerId, songId])
+  @@index([playerId])
+}
+
+// Individual round in a game
+model GameRound {
+  id String @id @default(cuid())
+
+  gameId String
+  game   Game   @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  roundNumber Int
+
+  songId String
+  song   Song   @relation(fields: [songId], references: [id])
+
+  // YouTube clip timing
+  clipStartTime Int // Start time in seconds
+  clipEndTime   Int // End time in seconds
+
+  status RoundStatus @default(PENDING)
+
+  startedAt DateTime?
+  endedAt   DateTime?
+
+  guesses RoundGuess[]
+
+  @@unique([gameId, roundNumber])
+  @@index([gameId])
+}
+
+enum RoundStatus {
+  PENDING
+  PLAYING_CLIP // Clip is being played
+  GUESSING // Player is guessing song name
+  PLACING // Player is placing on timeline
+  REVEALING // Showing the result
+  COMPLETED
+}
+
+// Player's guess for a round
+model RoundGuess {
+  id String @id @default(cuid())
+
+  roundId String
+  round   GameRound @relation(fields: [roundId], references: [id], onDelete: Cascade)
+
+  playerId String
+  player   Player @relation(fields: [playerId], references: [id], onDelete: Cascade)
+
+  // Song name guess
+  songNameGuess   String?
+  songNameCorrect Boolean @default(false)
+
+  // Timeline placement guess
+  placementPosition Int?
+  placementCorrect  Boolean @default(false)
+
+  pointsEarned Int @default(0)
+
+  submittedAt DateTime @default(now())
+
+  @@unique([roundId, playerId])
+  @@index([roundId])
+  @@index([playerId])
+}

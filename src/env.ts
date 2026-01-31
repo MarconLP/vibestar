@@ -4,6 +4,13 @@ import { z } from 'zod'
 export const env = createEnv({
   server: {
     SERVER_URL: z.string().url().optional(),
+    // YouTube API
+    YOUTUBE_API_KEY: z.string().min(1).optional(),
+    // Pusher server-side
+    PUSHER_APP_ID: z.string().min(1).optional(),
+    PUSHER_KEY: z.string().min(1).optional(),
+    PUSHER_SECRET: z.string().min(1).optional(),
+    PUSHER_CLUSTER: z.string().min(1).optional(),
   },
 
   /**
@@ -14,6 +21,9 @@ export const env = createEnv({
 
   client: {
     VITE_APP_TITLE: z.string().min(1).optional(),
+    // Pusher client-side
+    VITE_PUSHER_KEY: z.string().min(1).optional(),
+    VITE_PUSHER_CLUSTER: z.string().min(1).optional(),
   },
 
   /**
