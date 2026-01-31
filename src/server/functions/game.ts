@@ -306,13 +306,7 @@ export const submitSongGuess = createServerFn({
     // Check if guess is correct using fuzzy matching
     const isCorrect = fuzzyMatch(data.songNameGuess, round.song.name)
 
-    // Award a token if the guess is correct
-    if (isCorrect) {
-      await prisma.player.update({
-        where: { id: player.id },
-        data: { tokens: { increment: 1 } },
-      })
-    }
+    // Token is awarded later in revealResultsInternal when results are shown
 
     // Create or update guess
     const guess = await prisma.roundGuess.upsert({
