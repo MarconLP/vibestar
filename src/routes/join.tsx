@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { ArrowLeft, Loader2, Users, User } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { joinRoom } from '@/server/functions/room'
+import { authClient } from '@/lib/auth-client'
 
 export const Route = createFileRoute('/join')({
   component: JoinGame,
@@ -23,13 +24,20 @@ function JoinGame() {
     setError(null)
 
     try {
-      const result = await joinRoom({
-        data: { code: code.toUpperCase(), displayName: displayName.trim() },
-      })
-      // Set the session cookie from the response
-      if (result.cookie) {
-        document.cookie = result.cookie
+      // Sign in anonymously
+      const { error: signInError } = await authClient.signIn.anonymous()
+
+      if (signInError) {
+        throw new Error(signInError.message)
       }
+
+      // Update the user's name after signing in
+      await authClient.updateUser({ name: displayName.trim() })
+
+      // Join the room
+      const result = await joinRoom({
+        data: { code: code.toUpperCase() },
+      })
       if (result.room) {
         navigate({ to: '/room/$code', params: { code: result.room.code } })
       }

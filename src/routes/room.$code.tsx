@@ -5,7 +5,7 @@ import { getRoomByCode, leaveRoom } from '@/server/functions/room'
 import { startGame } from '@/server/functions/game'
 import { getPlaylists, importPlaylist } from '@/server/functions/playlist'
 import { usePresenceChannel, useChannel } from '@/hooks/usePusher'
-import { getClientSession } from '@/lib/session-client'
+import { authClient } from '@/lib/auth-client'
 import type {
   RoomPlayerJoinedEvent,
   RoomPlayerLeftEvent,
@@ -125,9 +125,9 @@ function RoomLobby() {
     }
   }
 
-  // Use presence channel ID or fall back to client session
-  const clientSession = getClientSession()
-  const currentUserId = myId || clientSession?.id
+  // Use presence channel ID or fall back to better-auth session
+  const { data: session } = authClient.useSession()
+  const currentUserId = myId || session?.user?.id
   const isHost = room.players.find((p) => p.isHost)?.userId === currentUserId
   const canStart = isHost && selectedPlaylistId && room.players.length >= 1
 

@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { ArrowLeft, Loader2, Settings, User } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { createRoom } from '@/server/functions/room'
+import { authClient } from '@/lib/auth-client'
 
 export const Route = createFileRoute('/create')({
   component: CreateGame,
@@ -26,14 +27,21 @@ function CreateGame() {
     setError(null)
 
     try {
-      const result = await createRoom({
-        data: { clipDuration, maxPlayers, displayName: displayName.trim() },
-      })
-      // Set the session cookie from the response
-      if (result.cookie) {
-        document.cookie = result.cookie
+      // Sign in anonymously
+      const { error: signInError } = await authClient.signIn.anonymous()
+
+      if (signInError) {
+        throw new Error(signInError.message)
       }
-      navigate({ to: '/room/$code', params: { code: result.room.code } })
+
+      // Update the user's name after signing in
+      await authClient.updateUser({ name: displayName.trim() })
+
+      // Create the room
+      const room = await createRoom({
+        data: { clipDuration, maxPlayers },
+      })
+      navigate({ to: '/room/$code', params: { code: room.code } })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create room')
       setIsCreating(false)

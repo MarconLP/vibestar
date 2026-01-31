@@ -89,7 +89,7 @@ export function GameOver({ result }: GameOverProps) {
         {/* Actions */}
         <div className="space-y-3">
           <Link
-            to="/game"
+            to="/"
             className="flex items-center justify-center gap-2 w-full py-3 px-4 rounded-xl font-semibold transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
             style={{
               background: 'linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%)',

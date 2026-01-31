@@ -22,7 +22,7 @@ export const startGame = createServerFn({
     (data: { roomId: string; playlistId: string; totalRounds?: number }) => data
   )
   .handler(async ({ data }) => {
-    const session = getSession()
+    const session = await getSession()
     if (!session) {
       throw new Error('Not logged in')
     }
@@ -36,7 +36,7 @@ export const startGame = createServerFn({
       throw new Error('Room not found')
     }
 
-    if (room.hostId !== session.id) {
+    if (room.hostId !== session.user.id) {
       throw new Error('Only the host can start the game')
     }
 
@@ -132,7 +132,7 @@ export const getGame = createServerFn({
 })
   .inputValidator((data: { gameId: string }) => data)
   .handler(async ({ data }) => {
-    const session = getSession()
+    const session = await getSession()
     if (!session) {
       throw new Error('Not logged in')
     }
@@ -160,7 +160,7 @@ export const getGame = createServerFn({
     }
 
     // Get the current player's info
-    const player = game.room.players.find((p) => p.userId === session.id)
+    const player = game.room.players.find((p) => p.userId === session.user.id)
 
     // Get the player's timeline
     const timeline = player
@@ -261,7 +261,7 @@ export const submitSongGuess = createServerFn({
 })
   .inputValidator((data: { gameId: string; roundId: string; songNameGuess: string }) => data)
   .handler(async ({ data }) => {
-    const session = getSession()
+    const session = await getSession()
     if (!session) {
       throw new Error('Not logged in')
     }
@@ -279,7 +279,7 @@ export const submitSongGuess = createServerFn({
     }
 
     const player = await prisma.player.findFirst({
-      where: { userId: session.id, roomId: round.game.room.id },
+      where: { userId: session.user.id, roomId: round.game.room.id },
     })
 
     if (!player) {
@@ -332,7 +332,7 @@ export const submitPlacement = createServerFn({
 })
   .inputValidator((data: { gameId: string; roundId: string; position: number }) => data)
   .handler(async ({ data }) => {
-    const session = getSession()
+    const session = await getSession()
     if (!session) {
       throw new Error('Not logged in')
     }
@@ -361,7 +361,7 @@ export const submitPlacement = createServerFn({
     }
 
     const player = await prisma.player.findFirst({
-      where: { userId: session.id, roomId: round.game.room.id },
+      where: { userId: session.user.id, roomId: round.game.room.id },
     })
 
     if (!player) {
@@ -565,7 +565,7 @@ export const continueGame = createServerFn({
 })
   .inputValidator((data: { gameId: string; roundNumber: number }) => data)
   .handler(async ({ data }) => {
-    const session = getSession()
+    const session = await getSession()
     if (!session) {
       throw new Error('Not logged in')
     }
@@ -584,7 +584,7 @@ export const continueGame = createServerFn({
     }
 
     // Only the current player can continue
-    const player = game.room.players.find((p) => p.userId === session.id)
+    const player = game.room.players.find((p) => p.userId === session.user.id)
     if (!player || game.currentPlayerId !== player.id) {
       throw new Error('Not your turn')
     }

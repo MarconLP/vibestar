@@ -1,5 +1,6 @@
 import { betterAuth } from 'better-auth'
 import { tanstackStartCookies } from 'better-auth/tanstack-start'
+import { anonymous } from 'better-auth/plugins'
 
 export const auth = betterAuth({
   socialProviders: {
@@ -8,5 +9,10 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     },
   },
-  plugins: [tanstackStartCookies()],
+  plugins: [
+    tanstackStartCookies(),
+    anonymous({
+      emailDomainName: 'vibestar.local',
+    }),
+  ],
 })

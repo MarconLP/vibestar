@@ -1,31 +1,19 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { json } from '@tanstack/react-start'
 import { authorizeChannel } from '@/lib/pusher/server'
+import { auth } from '@/lib/auth'
 
 export const Route = createFileRoute('/api/pusher/auth')({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        // Parse the session from cookies
-        const cookieHeader = request.headers.get('cookie') || ''
-        const cookies: Record<string, string> = {}
-        cookieHeader.split(';').forEach((cookie) => {
-          const [key, ...valueParts] = cookie.trim().split('=')
-          if (key) {
-            cookies[key] = decodeURIComponent(valueParts.join('='))
-          }
+        // Get session from better-auth
+        const session = await auth.api.getSession({
+          headers: request.headers,
         })
 
-        const sessionCookie = cookies['vibestar_session']
-        if (!sessionCookie) {
+        if (!session) {
           return json({ error: 'Unauthorized' }, { status: 401 })
-        }
-
-        let session: { id: string; displayName: string }
-        try {
-          session = JSON.parse(sessionCookie)
-        } catch {
-          return json({ error: 'Invalid session' }, { status: 401 })
         }
 
         const formData = await request.formData()
@@ -39,9 +27,9 @@ export const Route = createFileRoute('/api/pusher/auth')({
         // For presence channels, include user info
         if (channelName.startsWith('presence-')) {
           const authResponse = authorizeChannel(socketId, channelName, {
-            user_id: session.id,
+            user_id: session.user.id,
             user_info: {
-              displayName: session.displayName,
+              displayName: session.user.name || 'Anonymous',
             },
           })
           return json(authResponse)

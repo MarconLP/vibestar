@@ -10,7 +10,7 @@ export const importPlaylist = createServerFn({
 })
   .inputValidator((data: { playlistUrl: string }) => data)
   .handler(async ({ data }) => {
-    const session = getSession()
+    const session = await getSession()
     if (!session) {
       throw new Error('Not logged in')
     }
@@ -98,7 +98,7 @@ export const updateSong = createServerFn({
     (data: { songId: string; name?: string; artist?: string; releaseYear?: number }) => data
   )
   .handler(async ({ data }) => {
-    const session = getSession()
+    const session = await getSession()
     if (!session) {
       throw new Error('Not logged in')
     }
