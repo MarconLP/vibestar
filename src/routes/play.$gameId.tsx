@@ -101,36 +101,37 @@ function GamePlay() {
       setPhase('REVEALING')
       setIsContesting(false)
 
-      // Update player scores (now based on timeline count)
+      // Update player scores and tokens (synced across all clients)
       setPlayers((prev) =>
         prev.map((p) =>
           p.id === data.playerId
-            ? { ...p, score: data.timelineCount }
+            ? { ...p, score: data.timelineCount, tokens: data.playerTokens }
             : p
         )
       )
 
-      // If I earned a token, update my token count
-      if (data.playerId === player?.id && data.tokenEarned) {
-        setMyTokens((prev) => prev + 1)
+      // If it's my result, sync my token count
+      if (data.playerId === player?.id) {
+        setMyTokens(data.playerTokens)
       }
     })
 
     bind<GameContestResultEvent>('game:contest-result', (data) => {
-      // Update contester's score if successful
-      if (data.success) {
-        setPlayers((prev) =>
-          prev.map((p) =>
-            p.id === data.contesterId
-              ? { ...p, score: data.newTimelineCount }
-              : p
-          )
+      // Update contester's score and tokens (synced across all clients)
+      setPlayers((prev) =>
+        prev.map((p) =>
+          p.id === data.contesterId
+            ? { ...p, score: data.success ? data.newTimelineCount : p.score, tokens: data.newTokenCount }
+            : p
         )
-      }
+      )
 
-      // If I was the contester, update my timeline
-      if (data.contesterId === player?.id && data.success) {
-        refreshTimeline()
+      // If I was the contester, sync my tokens and timeline
+      if (data.contesterId === player?.id) {
+        setMyTokens(data.newTokenCount)
+        if (data.success) {
+          refreshTimeline()
+        }
       }
     })
 

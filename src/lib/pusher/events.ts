@@ -50,6 +50,7 @@ export interface GameRoundResultEvent {
   timelineCount: number
   canBeContested: boolean // True if placement was wrong and others can steal
   tokenEarned: boolean // True if player earned a token from correct song guess
+  playerTokens: number // The player's current token count (for syncing across clients)
   actualSong: {
     name: string
     artist: string
@@ -71,6 +72,7 @@ export interface GameContestResultEvent {
   contesterName: string
   success: boolean
   newTimelineCount: number
+  newTokenCount: number // Contester's token count after spending 1
 }
 
 export interface GameRoundEndEvent {

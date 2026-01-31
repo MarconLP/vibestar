@@ -473,6 +473,12 @@ export const submitPlacement = createServerFn({
     })
     const timelineCount = updatedTimeline.length
 
+    // Get the player's current token count (for syncing across clients)
+    const updatedPlayer = await prisma.player.findUnique({
+      where: { id: player.id },
+      select: { tokens: true },
+    })
+
     // Broadcast result
     await triggerEvent(`private-game-${data.gameId}`, 'game:round-result', {
       playerId: player.id,
@@ -482,6 +488,7 @@ export const submitPlacement = createServerFn({
       timelineCount,
       canBeContested: !isCorrect, // Can be contested if placement was wrong
       tokenEarned: guess?.songNameCorrect ?? false,
+      playerTokens: updatedPlayer?.tokens ?? 0,
       actualSong: {
         name: round.song.name,
         artist: round.song.artist,
@@ -751,9 +758,13 @@ export const contestPlacement = createServerFn({
       }
     }
 
-    // Get updated timeline count
+    // Get updated timeline count and token count
     const updatedTimeline = await prisma.timelineEntry.findMany({
       where: { playerId: player.id },
+    })
+    const updatedPlayer = await prisma.player.findUnique({
+      where: { id: player.id },
+      select: { tokens: true },
     })
 
     // Broadcast contest result
@@ -762,6 +773,7 @@ export const contestPlacement = createServerFn({
       contesterName: player.displayName,
       success: isCorrect,
       newTimelineCount: updatedTimeline.length,
+      newTokenCount: updatedPlayer?.tokens ?? 0,
     } satisfies GameContestResultEvent)
 
     return { success: isCorrect, newTimelineCount: updatedTimeline.length }
