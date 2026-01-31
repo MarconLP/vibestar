@@ -17,9 +17,6 @@ export function RoundResult({ result, isMyTurn, onContinue }: RoundResultProps) 
   const winners = contestResults?.filter((cr) => cr.isCorrect) ?? []
   const losers = contestResults?.filter((cr) => !cr.isCorrect) ?? []
 
-  // DEBUG: Remove this after testing
-  console.log('RoundResult debug:', { contestResults, hasContests, winnersCount: winners.length, losersCount: losers.length })
-
   return (
     <div className="p-6 rounded-2xl bg-neutral-900/50 border border-white/10 backdrop-blur-sm">
       <h2 className="text-xl font-bold text-white mb-6 text-center">
@@ -132,8 +129,8 @@ export function RoundResult({ result, isMyTurn, onContinue }: RoundResultProps) 
                         ({loser.isOriginal ? 'Original' : 'Contest'})
                       </span>
                     </div>
-                    <span className="text-neutral-500 text-sm">
-                      Position {(loser.position ?? 0) + 1}
+                    <span className="text-red-400 text-sm">
+                      Position {(loser.position ?? 0) + 1} — Incorrect
                     </span>
                   </div>
                 ))}

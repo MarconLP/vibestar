@@ -437,8 +437,19 @@ function GamePlay() {
                         {myTokens > 0 && !contestSubmitted && ' Spend a token to contest with your own placement!'}
                       </p>
                       {contestSubmitted ? (
-                        <div className="p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/30 text-center">
-                          <p className="text-yellow-400 font-medium">Contest submitted! Waiting for results...</p>
+                        <div>
+                          <div className="p-3 rounded-xl bg-green-500/10 border border-green-500/30 text-center mb-4">
+                            <p className="text-green-400 font-medium">Contest submitted! Waiting for results...</p>
+                          </div>
+                          <Timeline
+                            entries={contestWindow.currentPlayerTimeline.map((e, i) => ({
+                              ...e,
+                              song: { ...e.song, id: `temp-${i}`, thumbnailUrl: null },
+                            }))}
+                            placingMode={false}
+                            guessPosition={contestWindow.placementPosition}
+                            contestVotes={contestSubmissions.map(s => ({ contesterName: s.contesterName, position: s.position }))}
+                          />
                         </div>
                       ) : myTokens > 0 ? (
                         <>
