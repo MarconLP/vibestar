@@ -26,14 +26,19 @@ function CreateGame() {
     setError(null)
 
     try {
-      // Sign in anonymously
-      const { error: signInError } = await authClient.signIn.anonymous()
+      // Check if already signed in
+      const session = await authClient.getSession()
 
-      if (signInError) {
-        throw new Error(signInError.message)
+      if (!session.data) {
+        // Sign in anonymously if not already signed in
+        const { error: signInError } = await authClient.signIn.anonymous()
+
+        if (signInError) {
+          throw new Error(signInError.message)
+        }
       }
 
-      // Update the user's name after signing in
+      // Update the user's name
       await authClient.updateUser({ name: displayName.trim() })
 
       // Create the room
