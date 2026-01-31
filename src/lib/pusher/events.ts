@@ -39,7 +39,7 @@ export interface GameRoundStartEvent {
 }
 
 export interface GameRoundPhaseEvent {
-  phase: 'PLAYING_CLIP' | 'GUESSING' | 'PLACING' | 'REVEALING'
+  phase: 'PLAYING_CLIP' | 'PLACING' | 'REVEALING'
 }
 
 export interface GameRoundResultEvent {
@@ -47,7 +47,7 @@ export interface GameRoundResultEvent {
   songNameGuess: string | null
   songNameCorrect: boolean
   placementCorrect: boolean
-  pointsEarned: number
+  timelineCount: number
   actualSong: {
     name: string
     artist: string

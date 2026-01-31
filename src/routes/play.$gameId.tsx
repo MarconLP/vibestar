@@ -90,11 +90,11 @@ function GamePlay() {
       setRoundResult(data)
       setPhase('REVEALING')
 
-      // Update player scores
+      // Update player scores (now based on timeline count)
       setPlayers((prev) =>
         prev.map((p) =>
           p.id === data.playerId
-            ? { ...p, score: p.score + data.pointsEarned }
+            ? { ...p, score: data.timelineCount }
             : p
         )
       )

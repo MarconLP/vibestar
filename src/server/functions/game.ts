@@ -1,6 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
 import { prisma } from '@/db'
-import { shuffleArray, checkPlacementCorrect, calculatePoints } from '@/lib/game/utils'
+import { shuffleArray, checkPlacementCorrect, calculatePoints, SONGS_TO_WIN } from '@/lib/game/utils'
 import { calculateClipStart } from '@/lib/youtube/api'
 import { fuzzyMatch } from '@/lib/game/fuzzy-match'
 import { triggerEvent } from '@/lib/pusher/server'
@@ -388,8 +388,8 @@ export const submitPlacement = createServerFn({
       },
     })
 
-    // Calculate points
-    const points = calculatePoints(guess?.songNameCorrect ?? false, isCorrect)
+    // Calculate points (1 for correct placement, 0 otherwise)
+    const points = calculatePoints(isCorrect)
 
     // Update guess with placement
     await prisma.roundGuess.update({
@@ -458,13 +458,19 @@ export const submitPlacement = createServerFn({
       },
     })
 
+    // Get updated timeline count
+    const updatedTimeline = await prisma.timelineEntry.findMany({
+      where: { playerId: player.id },
+    })
+    const timelineCount = updatedTimeline.length
+
     // Broadcast result
     await triggerEvent(`private-game-${data.gameId}`, 'game:round-result', {
       playerId: player.id,
       songNameGuess: guess?.songNameGuess ?? null,
       songNameCorrect: guess?.songNameCorrect ?? false,
       placementCorrect: isCorrect,
-      pointsEarned: points,
+      timelineCount,
       actualSong: {
         name: round.song.name,
         artist: round.song.artist,
@@ -508,8 +514,20 @@ async function advanceGame(gameId: string, currentRoundNumber: number) {
     },
   })
 
-  // Check if game is over
-  if (currentRoundNumber >= game.totalRounds) {
+  // Check if any player has reached SONGS_TO_WIN on their timeline
+  const playerTimelines = await Promise.all(
+    players.map(async (p) => {
+      const timeline = await prisma.timelineEntry.findMany({
+        where: { playerId: p.id },
+      })
+      return { player: p, count: timeline.length }
+    })
+  )
+
+  const winner = playerTimelines.find((pt) => pt.count >= SONGS_TO_WIN)
+  const isGameOver = winner || currentRoundNumber >= game.totalRounds
+
+  if (isGameOver) {
     // Game over
     await prisma.game.update({
       where: { id: gameId },
@@ -524,20 +542,20 @@ async function advanceGame(gameId: string, currentRoundNumber: number) {
       data: { status: 'FINISHED' },
     })
 
-    // Determine winner
-    const sortedPlayers = [...players].sort((a, b) => b.score - a.score)
-    const winner = sortedPlayers[0]
+    // Determine winner by timeline count (most songs wins)
+    const sortedByTimeline = [...playerTimelines].sort((a, b) => b.count - a.count)
+    const gameWinner = sortedByTimeline[0]
 
     await triggerEvent(`private-game-${gameId}`, 'game:ended', {
       winner: {
-        playerId: winner.id,
-        displayName: winner.displayName,
-        score: winner.score,
+        playerId: gameWinner.player.id,
+        displayName: gameWinner.player.displayName,
+        score: gameWinner.count,
       },
-      finalScores: sortedPlayers.map((p) => ({
-        playerId: p.id,
-        displayName: p.displayName,
-        score: p.score,
+      finalScores: sortedByTimeline.map((pt) => ({
+        playerId: pt.player.id,
+        displayName: pt.player.displayName,
+        score: pt.count,
       })),
     } satisfies GameEndedEvent)
   } else {

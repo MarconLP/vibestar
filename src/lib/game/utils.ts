@@ -34,10 +34,10 @@ export function checkPlacementCorrect(
   return beforeOk && afterOk
 }
 
-// Calculate points for a round
-export function calculatePoints(songNameCorrect: boolean, placementCorrect: boolean): number {
-  let points = 0
-  if (songNameCorrect) points += 10
-  if (placementCorrect) points += 15
-  return points
+// Calculate points for a round - only placement matters
+export function calculatePoints(placementCorrect: boolean): number {
+  return placementCorrect ? 1 : 0
 }
+
+// Target number of correct songs to win
+export const SONGS_TO_WIN = 10

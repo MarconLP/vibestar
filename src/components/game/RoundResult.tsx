@@ -1,4 +1,5 @@
 import { Check, X, Music } from 'lucide-react'
+import { SONGS_TO_WIN } from '@/lib/game/utils'
 import type { GameRoundResultEvent } from '@/lib/pusher/events'
 
 interface RoundResultProps {
@@ -8,7 +9,7 @@ interface RoundResultProps {
 }
 
 export function RoundResult({ result, isMyTurn, onContinue }: RoundResultProps) {
-  const { songNameCorrect, placementCorrect, pointsEarned, actualSong, songNameGuess } = result
+  const { songNameGuess, songNameCorrect, placementCorrect, timelineCount, actualSong } = result
 
   return (
     <div className="p-6 rounded-2xl bg-neutral-900/50 border border-white/10 backdrop-blur-sm">
@@ -37,19 +38,16 @@ export function RoundResult({ result, isMyTurn, onContinue }: RoundResultProps) 
         {/* Song Name Result */}
         <div className="flex items-center justify-between p-4 rounded-xl bg-neutral-800/50 border border-white/5">
           <div>
-            <p className="text-neutral-400 text-sm">Song Name</p>
+            <p className="text-neutral-400 text-sm">Song Name Guess</p>
             <p className="text-white">
               {songNameGuess || <span className="text-neutral-500 italic">No guess</span>}
             </p>
           </div>
           <div className="flex items-center gap-2">
             {songNameCorrect ? (
-              <>
-                <span className="text-green-400 font-bold">+10</span>
-                <div className="p-1 rounded-full bg-green-500">
-                  <Check className="w-4 h-4 text-white" />
-                </div>
-              </>
+              <div className="p-1 rounded-full bg-green-500">
+                <Check className="w-4 h-4 text-white" />
+              </div>
             ) : (
               <div className="p-1 rounded-full bg-red-500">
                 <X className="w-4 h-4 text-white" />
@@ -63,17 +61,14 @@ export function RoundResult({ result, isMyTurn, onContinue }: RoundResultProps) 
           <div>
             <p className="text-neutral-400 text-sm">Timeline Placement</p>
             <p className="text-white">
-              {placementCorrect ? 'Correct position!' : 'Wrong position'}
+              {placementCorrect ? 'Correct! Song added to timeline' : 'Wrong position'}
             </p>
           </div>
           <div className="flex items-center gap-2">
             {placementCorrect ? (
-              <>
-                <span className="text-green-400 font-bold">+15</span>
-                <div className="p-1 rounded-full bg-green-500">
-                  <Check className="w-4 h-4 text-white" />
-                </div>
-              </>
+              <div className="p-1 rounded-full bg-green-500">
+                <Check className="w-4 h-4 text-white" />
+              </div>
             ) : (
               <div className="p-1 rounded-full bg-red-500">
                 <X className="w-4 h-4 text-white" />
@@ -83,11 +78,16 @@ export function RoundResult({ result, isMyTurn, onContinue }: RoundResultProps) 
         </div>
       </div>
 
-      {/* Total Points */}
+      {/* Progress to Win */}
       <div className="text-center mb-6">
-        <p className="text-neutral-400 mb-1">Points Earned</p>
-        <p className="text-4xl font-bold text-green-400">
-          +{pointsEarned}
+        <p className="text-neutral-400 mb-2">Timeline Progress</p>
+        <div className="flex items-center justify-center gap-2">
+          <span className="text-4xl font-bold text-green-400">{timelineCount}</span>
+          <span className="text-2xl text-neutral-500">/</span>
+          <span className="text-2xl text-neutral-400">{SONGS_TO_WIN}</span>
+        </div>
+        <p className="text-sm text-neutral-500 mt-1">
+          {SONGS_TO_WIN - timelineCount} more to win!
         </p>
       </div>
 
