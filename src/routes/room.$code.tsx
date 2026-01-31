@@ -50,7 +50,7 @@ function RoomLobby() {
     bind<RoomPlayerJoinedEvent>('room:player-joined', (data) => {
       setRoom((prev) => ({
         ...prev,
-        players: [...prev.players, { ...data.player, isHost: false, score: 0, joinedAt: new Date(), roomId: prev.id, userId: '', avatarUrl: data.player.avatarUrl ?? null }],
+        players: [...prev.players, { ...data.player, isHost: false, score: 0, tokens: 0, joinedAt: new Date(), roomId: prev.id, userId: '', avatarUrl: data.player.avatarUrl ?? null }],
       }))
     })
 

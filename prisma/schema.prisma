@@ -116,6 +116,7 @@ model Player {
   room   GameRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
   score  Int     @default(0)
+  tokens Int     @default(0) // Earned by guessing song names correctly, used to contest
   isHost Boolean @default(false)
 
   joinedAt DateTime @default(now())
@@ -180,6 +181,7 @@ enum RoundStatus {
   GUESSING // Player is guessing song name
   PLACING // Player is placing on timeline
   REVEALING // Showing the result
+  CONTESTING // Other players can contest with tokens
   COMPLETED
 }
 

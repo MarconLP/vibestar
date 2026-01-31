@@ -1,4 +1,4 @@
-import { Check, X, Music } from 'lucide-react'
+import { Check, X, Music, Coins } from 'lucide-react'
 import { SONGS_TO_WIN } from '@/lib/game/utils'
 import type { GameRoundResultEvent } from '@/lib/pusher/events'
 
@@ -6,10 +6,14 @@ interface RoundResultProps {
   result: GameRoundResultEvent
   isMyTurn: boolean
   onContinue: () => void
+  myTokens?: number
+  onStartContest?: () => void
 }
 
-export function RoundResult({ result, isMyTurn, onContinue }: RoundResultProps) {
-  const { songNameGuess, songNameCorrect, placementCorrect, timelineCount, actualSong } = result
+export function RoundResult({ result, isMyTurn, onContinue, myTokens = 0, onStartContest }: RoundResultProps) {
+  const { songNameGuess, songNameCorrect, placementCorrect, timelineCount, actualSong, canBeContested, tokenEarned } = result
+
+  const canContest = !isMyTurn && canBeContested && myTokens > 0
 
   return (
     <div className="p-6 rounded-2xl bg-neutral-900/50 border border-white/10 backdrop-blur-sm">
@@ -45,9 +49,15 @@ export function RoundResult({ result, isMyTurn, onContinue }: RoundResultProps) 
           </div>
           <div className="flex items-center gap-2">
             {songNameCorrect ? (
-              <div className="p-1 rounded-full bg-green-500">
-                <Check className="w-4 h-4 text-white" />
-              </div>
+              <>
+                <span className="flex items-center gap-1 text-yellow-400 font-bold text-sm">
+                  <Coins className="w-4 h-4" />
+                  +1 token
+                </span>
+                <div className="p-1 rounded-full bg-green-500">
+                  <Check className="w-4 h-4 text-white" />
+                </div>
+              </>
             ) : (
               <div className="p-1 rounded-full bg-red-500">
                 <X className="w-4 h-4 text-white" />
@@ -78,6 +88,16 @@ export function RoundResult({ result, isMyTurn, onContinue }: RoundResultProps) 
         </div>
       </div>
 
+      {/* Token earned notification */}
+      {isMyTurn && tokenEarned && (
+        <div className="mb-6 p-3 rounded-xl bg-yellow-500/10 border border-yellow-500/30 text-center">
+          <p className="text-yellow-400 font-medium flex items-center justify-center gap-2">
+            <Coins className="w-5 h-5" />
+            You earned a token! Use it to contest other players' placements.
+          </p>
+        </div>
+      )}
+
       {/* Progress to Win */}
       <div className="text-center mb-6">
         <p className="text-neutral-400 mb-2">Timeline Progress</p>
@@ -90,6 +110,22 @@ export function RoundResult({ result, isMyTurn, onContinue }: RoundResultProps) 
           {SONGS_TO_WIN - timelineCount} more to win!
         </p>
       </div>
+
+      {/* Contest Button - for other players when placement was wrong */}
+      {canContest && (
+        <div className="mb-4">
+          <button
+            onClick={onStartContest}
+            className="w-full py-3 px-4 rounded-xl font-semibold bg-yellow-500 text-black transition-all duration-200 hover:bg-yellow-400 hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2"
+          >
+            <Coins className="w-5 h-5" />
+            Contest & Steal Song (1 token)
+          </button>
+          <p className="text-xs text-neutral-500 text-center mt-2">
+            You have {myTokens} token{myTokens !== 1 ? 's' : ''}. Place correctly to add the song to your timeline!
+          </p>
+        </div>
+      )}
 
       {/* Continue Button - only for the player whose turn it was */}
       {isMyTurn ? (

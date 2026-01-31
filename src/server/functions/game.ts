@@ -12,6 +12,7 @@ import type {
   GameRoundResultEvent,
   GameTurnChangeEvent,
   GameEndedEvent,
+  GameContestResultEvent,
 } from '@/lib/pusher/events'
 
 // Start a game (host only)
@@ -293,6 +294,14 @@ export const submitSongGuess = createServerFn({
     // Check if guess is correct using fuzzy matching
     const isCorrect = fuzzyMatch(data.songNameGuess, round.song.name)
 
+    // Award a token if the guess is correct
+    if (isCorrect) {
+      await prisma.player.update({
+        where: { id: player.id },
+        data: { tokens: { increment: 1 } },
+      })
+    }
+
     // Create or update guess
     const guess = await prisma.roundGuess.upsert({
       where: {
@@ -471,6 +480,8 @@ export const submitPlacement = createServerFn({
       songNameCorrect: guess?.songNameCorrect ?? false,
       placementCorrect: isCorrect,
       timelineCount,
+      canBeContested: !isCorrect, // Can be contested if placement was wrong
+      tokenEarned: guess?.songNameCorrect ?? false,
       actualSong: {
         name: round.song.name,
         artist: round.song.artist,
@@ -626,4 +637,132 @@ export const getPlayerTimeline = createServerFn({
     })
 
     return timeline
+  })
+
+// Contest a placement - spend a token to try to steal the song
+export const contestPlacement = createServerFn({
+  method: 'POST',
+})
+  .inputValidator((data: { gameId: string; roundId: string; position: number }) => data)
+  .handler(async ({ data }) => {
+    const session = await getSession()
+    if (!session) {
+      throw new Error('Not logged in')
+    }
+
+    const round = await prisma.gameRound.findUnique({
+      where: { id: data.roundId },
+      include: {
+        song: true,
+        game: {
+          include: {
+            room: {
+              include: { players: { orderBy: { joinedAt: 'asc' } } },
+            },
+          },
+        },
+        guesses: true,
+      },
+    })
+
+    if (!round) {
+      throw new Error('Round not found')
+    }
+
+    // Can only contest during REVEALING phase when original placement was wrong
+    if (round.status !== 'REVEALING') {
+      throw new Error('Cannot contest at this time')
+    }
+
+    // Check that original placement was wrong
+    const originalGuess = round.guesses.find(
+      (g) => g.playerId === round.game.currentPlayerId
+    )
+    if (originalGuess?.placementCorrect) {
+      throw new Error('Cannot contest a correct placement')
+    }
+
+    const player = await prisma.player.findFirst({
+      where: { userId: session.user.id, roomId: round.game.room.id },
+    })
+
+    if (!player) {
+      throw new Error('Player not found')
+    }
+
+    // Cannot contest your own placement
+    if (player.id === round.game.currentPlayerId) {
+      throw new Error('Cannot contest your own placement')
+    }
+
+    // Must have at least 1 token
+    if (player.tokens < 1) {
+      throw new Error('No tokens available')
+    }
+
+    // Spend the token
+    await prisma.player.update({
+      where: { id: player.id },
+      data: { tokens: { decrement: 1 } },
+    })
+
+    // Get contester's timeline
+    const timeline = await prisma.timelineEntry.findMany({
+      where: { playerId: player.id },
+      include: { song: true },
+      orderBy: { position: 'asc' },
+    })
+
+    // Check if contester's placement is correct
+    const isCorrect = checkPlacementCorrect(timeline, data.position, round.song.releaseYear)
+
+    if (isCorrect) {
+      // Contester wins! Add song to their timeline
+      const existingEntry = await prisma.timelineEntry.findUnique({
+        where: {
+          playerId_songId: {
+            playerId: player.id,
+            songId: round.songId,
+          },
+        },
+      })
+
+      if (!existingEntry) {
+        // Shift existing entries
+        await prisma.timelineEntry.updateMany({
+          where: {
+            playerId: player.id,
+            position: { gte: data.position },
+          },
+          data: {
+            position: { increment: 1 },
+          },
+        })
+
+        // Add the song
+        await prisma.timelineEntry.create({
+          data: {
+            playerId: player.id,
+            songId: round.songId,
+            position: data.position,
+            addedInRound: round.roundNumber,
+          },
+        })
+      }
+    }
+
+    // Get updated timeline count
+    const updatedTimeline = await prisma.timelineEntry.findMany({
+      where: { playerId: player.id },
+    })
+
+    // Broadcast contest result
+    await triggerEvent(`private-game-${data.gameId}`, 'game:contest-result', {
+      contesterId: player.id,
+      contesterName: player.displayName,
+      success: isCorrect,
+      newTimelineCount: updatedTimeline.length,
+    } satisfies GameContestResultEvent)
+
+    return { success: isCorrect, newTimelineCount: updatedTimeline.length }
   })

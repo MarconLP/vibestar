@@ -26,6 +26,7 @@ export const RoundStatus = {
   GUESSING: 'GUESSING',
   PLACING: 'PLACING',
   REVEALING: 'REVEALING',
+  CONTESTING: 'CONTESTING',
   COMPLETED: 'COMPLETED'
 } as const
 

@@ -1190,6 +1190,7 @@ export const PlayerScalarFieldEnum = {
   avatarUrl: 'avatarUrl',
   roomId: 'roomId',
   score: 'score',
+  tokens: 'tokens',
   isHost: 'isHost',
   joinedAt: 'joinedAt'
 } as const

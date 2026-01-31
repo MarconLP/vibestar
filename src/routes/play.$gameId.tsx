@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { useState, useEffect, useCallback } from 'react'
-import { getGame, getCurrentRound, startRound, submitSongGuess, submitPlacement, getPlayerTimeline, continueGame } from '@/server/functions/game'
+import { getGame, getCurrentRound, startRound, submitSongGuess, submitPlacement, getPlayerTimeline, continueGame, contestPlacement } from '@/server/functions/game'
 import { useChannel } from '@/hooks/usePusher'
 import { Timeline } from '@/components/game/Timeline'
 import { YouTubePlayer } from '@/components/game/YouTubePlayer'
@@ -14,6 +14,7 @@ import type {
   GameRoundResultEvent,
   GameTurnChangeEvent,
   GameEndedEvent,
+  GameContestResultEvent,
 } from '@/lib/pusher/events'
 
 type GamePhase = 'WAITING' | 'PLAYING_CLIP' | 'GUESSING' | 'PLACING' | 'REVEALING' | 'GAME_OVER'
@@ -59,8 +60,17 @@ function GamePlay() {
   const [roundResult, setRoundResult] = useState<GameRoundResultEvent | null>(null)
   const [gameResult, setGameResult] = useState<GameEndedEvent | null>(null)
   const [guessSubmitted, setGuessSubmitted] = useState(false)
+  const [myTokens, setMyTokens] = useState(player?.tokens ?? 0)
+  const [isContesting, setIsContesting] = useState(false)
 
   const isMyTurn = currentPlayerId === player?.id
+
+  // Refresh timeline when it's updated
+  const refreshTimeline = useCallback(async () => {
+    if (!player) return
+    const updated = await getPlayerTimeline({ data: { playerId: player.id } })
+    setTimeline(updated as TimelineEntry[])
+  }, [player])
 
   // Subscribe to game events
   const { bind, unbind } = useChannel(`private-game-${game.id}`)
@@ -89,6 +99,7 @@ function GamePlay() {
     bind<GameRoundResultEvent>('game:round-result', (data) => {
       setRoundResult(data)
       setPhase('REVEALING')
+      setIsContesting(false)
 
       // Update player scores (now based on timeline count)
       setPlayers((prev) =>
@@ -98,6 +109,29 @@ function GamePlay() {
             : p
         )
       )
+
+      // If I earned a token, update my token count
+      if (data.playerId === player?.id && data.tokenEarned) {
+        setMyTokens((prev) => prev + 1)
+      }
+    })
+
+    bind<GameContestResultEvent>('game:contest-result', (data) => {
+      // Update contester's score if successful
+      if (data.success) {
+        setPlayers((prev) =>
+          prev.map((p) =>
+            p.id === data.contesterId
+              ? { ...p, score: data.newTimelineCount }
+              : p
+          )
+        )
+      }
+
+      // If I was the contester, update my timeline
+      if (data.contesterId === player?.id && data.success) {
+        refreshTimeline()
+      }
     })
 
     bind<GameTurnChangeEvent>('game:turn-change', (data) => {
@@ -116,17 +150,11 @@ function GamePlay() {
       unbind('game:round-start')
       unbind('game:round-phase')
       unbind('game:round-result')
+      unbind('game:contest-result')
       unbind('game:turn-change')
       unbind('game:ended')
     }
-  }, [bind, unbind])
-
-  // Refresh timeline when it's updated
-  const refreshTimeline = useCallback(async () => {
-    if (!player) return
-    const updated = await getPlayerTimeline({ data: { playerId: player.id } })
-    setTimeline(updated as TimelineEntry[])
-  }, [player])
+  }, [bind, unbind, player?.id, refreshTimeline])
 
   useEffect(() => {
     if (phase === 'REVEALING' && roundResult?.playerId === player?.id && roundResult?.placementCorrect) {
@@ -186,6 +214,33 @@ function GamePlay() {
     setRoundResult(null)
   }
 
+  // Handle contesting a placement
+  const handleContest = async (position: number) => {
+    if (!currentRound) return
+    setIsContesting(false)
+
+    // Spend token locally immediately for responsive UI
+    setMyTokens((prev) => prev - 1)
+
+    await contestPlacement({
+      data: {
+        gameId: game.id,
+        roundId: currentRound.roundId,
+        position,
+      },
+    })
+  }
+
+  // Start contest mode (show timeline for placement)
+  const handleStartContest = () => {
+    setIsContesting(true)
+  }
+
+  // Cancel contest
+  const handleCancelContest = () => {
+    setIsContesting(false)
+  }
+
   if (phase === 'GAME_OVER' && gameResult) {
     return <GameOver result={gameResult} />
   }
@@ -210,7 +265,7 @@ function GamePlay() {
                 {isMyTurn ? "Your turn!" : `${currentPlayerName}'s turn`}
               </p>
             </div>
-            <Scoreboard players={players} currentPlayerId={currentPlayerId} />
+            <Scoreboard players={players} currentPlayerId={currentPlayerId} myTokens={myTokens} myPlayerId={player?.id} />
           </div>
 
           <div className="grid lg:grid-cols-3 gap-6">
@@ -274,12 +329,37 @@ function GamePlay() {
               )}
 
               {/* Revealing Result */}
-              {phase === 'REVEALING' && roundResult && (
+              {phase === 'REVEALING' && roundResult && !isContesting && (
                 <RoundResult
                   result={roundResult}
                   isMyTurn={roundResult.playerId === player?.id}
                   onContinue={handleContinue}
+                  myTokens={myTokens}
+                  onStartContest={handleStartContest}
                 />
+              )}
+
+              {/* Contest Mode - placing song on own timeline */}
+              {phase === 'REVEALING' && isContesting && roundResult && (
+                <div className="p-6 rounded-2xl bg-neutral-900/50 border border-yellow-500/30 backdrop-blur-sm">
+                  <h2 className="text-xl font-bold text-yellow-400 mb-2">
+                    Contest! Place the song on YOUR timeline
+                  </h2>
+                  <p className="text-neutral-400 mb-4">
+                    {roundResult.actualSong.name} by {roundResult.actualSong.artist} ({roundResult.actualSong.releaseYear})
+                  </p>
+                  <Timeline
+                    entries={timeline}
+                    placingMode={true}
+                    onPlacement={handleContest}
+                  />
+                  <button
+                    onClick={handleCancelContest}
+                    className="mt-4 px-4 py-2 rounded-lg text-neutral-400 hover:text-white transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
               )}
 
               {/* Watching other player */}

@@ -48,11 +48,29 @@ export interface GameRoundResultEvent {
   songNameCorrect: boolean
   placementCorrect: boolean
   timelineCount: number
+  canBeContested: boolean // True if placement was wrong and others can steal
+  tokenEarned: boolean // True if player earned a token from correct song guess
   actualSong: {
     name: string
     artist: string
     releaseYear: number
   }
+}
+
+export interface GameContestStartEvent {
+  roundId: string
+  songId: string
+  songName: string
+  songArtist: string
+  releaseYear: number
+  contestDeadline: number // Timestamp when contest window closes
+}
+
+export interface GameContestResultEvent {
+  contesterId: string
+  contesterName: string
+  success: boolean
+  newTimelineCount: number
 }
 
 export interface GameRoundEndEvent {
