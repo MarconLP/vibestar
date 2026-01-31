@@ -248,6 +248,7 @@ export const startRound = createServerFn({
     })
 
     await triggerEvent(`private-game-${game.id}`, 'game:round-start', {
+      roundId: round.id,
       roundNumber: round.roundNumber,
       currentPlayerId: game.currentPlayerId!,
       clipStartTime: round.clipStartTime,
@@ -358,6 +359,11 @@ export const submitPlacement = createServerFn({
       throw new Error('Round not found')
     }
 
+    // Prevent duplicate submissions
+    if (round.status === 'REVEALING' || round.status === 'COMPLETED') {
+      return { isCorrect: false, points: 0, alreadyProcessed: true }
+    }
+
     const player = await prisma.player.findFirst({
       where: { userId: session.user.id, roomId: round.game.room.id },
     })
@@ -406,26 +412,38 @@ export const submitPlacement = createServerFn({
 
     // If placement is correct, add song to timeline
     if (isCorrect) {
-      // Shift existing entries at or after this position
-      await prisma.timelineEntry.updateMany({
+      // Check if song is already on timeline (prevent duplicates from race conditions)
+      const existingEntry = await prisma.timelineEntry.findUnique({
         where: {
-          playerId: player.id,
-          position: { gte: data.position },
-        },
-        data: {
-          position: { increment: 1 },
+          playerId_songId: {
+            playerId: player.id,
+            songId: round.songId,
+          },
         },
       })
 
-      // Add the new song
-      await prisma.timelineEntry.create({
-        data: {
-          playerId: player.id,
-          songId: round.songId,
-          position: data.position,
-          addedInRound: round.roundNumber,
-        },
-      })
+      if (!existingEntry) {
+        // Shift existing entries at or after this position
+        await prisma.timelineEntry.updateMany({
+          where: {
+            playerId: player.id,
+            position: { gte: data.position },
+          },
+          data: {
+            position: { increment: 1 },
+          },
+        })
+
+        // Add the new song
+        await prisma.timelineEntry.create({
+          data: {
+            playerId: player.id,
+            songId: round.songId,
+            position: data.position,
+            addedInRound: round.roundNumber,
+          },
+        })
+      }
     }
 
     // Update player score
@@ -544,6 +562,7 @@ async function advanceGame(gameId: string, currentRoundNumber: number) {
 
       await triggerEvent(`private-game-${gameId}`, 'game:turn-change', {
         currentPlayerId: players[0].id,
+        roundNumber: nextRound,
       } satisfies GameTurnChangeEvent)
     }
   } else {
@@ -557,6 +576,7 @@ async function advanceGame(gameId: string, currentRoundNumber: number) {
 
     await triggerEvent(`private-game-${gameId}`, 'game:turn-change', {
       currentPlayerId: players[nextPlayerIndex].id,
+      roundNumber: currentRoundNumber,
     } satisfies GameTurnChangeEvent)
   }
 }

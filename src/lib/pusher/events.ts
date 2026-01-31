@@ -30,6 +30,7 @@ export interface RoomPlayerLeftEvent {
 
 // Game Events (private-game-{gameId})
 export interface GameRoundStartEvent {
+  roundId: string
   roundNumber: number
   currentPlayerId: string
   clipStartTime: number
@@ -61,6 +62,7 @@ export interface GameRoundEndEvent {
 
 export interface GameTurnChangeEvent {
   currentPlayerId: string
+  roundNumber: number
 }
 
 export interface GameEndedEvent {

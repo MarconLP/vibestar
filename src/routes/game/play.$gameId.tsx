@@ -52,6 +52,7 @@ function GamePlay() {
     game.status === 'FINISHED' ? 'GAME_OVER' : 'WAITING'
   )
   const [currentRound, setCurrentRound] = useState(initialRound)
+  const [currentRoundNumber, setCurrentRoundNumber] = useState(game.currentRound)
   const [currentPlayerId, setCurrentPlayerId] = useState(game.currentPlayerId)
   const [timeline, setTimeline] = useState<TimelineEntry[]>(initialTimeline as TimelineEntry[])
   const [players, setPlayers] = useState(game.room.players)
@@ -67,13 +68,14 @@ function GamePlay() {
   useEffect(() => {
     bind<GameRoundStartEvent>('game:round-start', (data) => {
       setCurrentRound({
-        roundId: '',
+        roundId: data.roundId,
         roundNumber: data.roundNumber,
         videoId: data.videoId,
         clipStartTime: data.clipStartTime,
         clipEndTime: data.clipEndTime,
         status: 'PLAYING_CLIP',
       })
+      setCurrentRoundNumber(data.roundNumber)
       setCurrentPlayerId(data.currentPlayerId)
       setPhase('PLAYING_CLIP')
       setGuessSubmitted(false)
@@ -100,6 +102,7 @@ function GamePlay() {
 
     bind<GameTurnChangeEvent>('game:turn-change', (data) => {
       setCurrentPlayerId(data.currentPlayerId)
+      setCurrentRoundNumber(data.roundNumber)
       setPhase('WAITING')
       setGuessSubmitted(false)
     })
@@ -136,7 +139,7 @@ function GamePlay() {
     await startRound({
       data: {
         gameId: game.id,
-        roundNumber: game.currentRound,
+        roundNumber: currentRoundNumber,
       },
     })
   }
@@ -191,7 +194,7 @@ function GamePlay() {
         {/* Game Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="text-white">
-            <h1 className="text-2xl font-bold">Round {game.currentRound} / {game.totalRounds}</h1>
+            <h1 className="text-2xl font-bold">Round {currentRoundNumber} / {game.totalRounds}</h1>
             <p className="text-gray-400">
               {isMyTurn ? "Your turn!" : `${currentPlayerName}'s turn`}
             </p>
