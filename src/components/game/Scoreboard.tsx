@@ -43,12 +43,10 @@ export function Scoreboard({ players, currentPlayerId, myTokens, myPlayerId }: S
               <p className="text-sm text-white font-medium">{player.displayName}</p>
               <div className="flex items-center justify-end gap-2">
                 <span className="text-xs text-green-400 font-bold">{player.score} songs</span>
-                {tokens !== undefined && tokens > 0 && (
-                  <span className="flex items-center gap-0.5 text-xs text-yellow-400 font-bold">
-                    <Coins className="w-3 h-3" />
-                    {tokens}
-                  </span>
-                )}
+                <span className={`flex items-center gap-0.5 text-xs font-bold ${(tokens ?? 0) > 0 ? 'text-yellow-400' : 'text-neutral-500'}`}>
+                  <Coins className="w-3 h-3" />
+                  {tokens ?? 0}
+                </span>
               </div>
             </div>
           </div>

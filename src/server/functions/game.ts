@@ -145,6 +145,17 @@ export const getGame = createServerFn({
           include: {
             players: {
               orderBy: { joinedAt: 'asc' },
+              select: {
+                id: true,
+                userId: true,
+                displayName: true,
+                avatarUrl: true,
+                score: true,
+                tokens: true,
+                isHost: true,
+                joinedAt: true,
+                roomId: true,
+              },
             },
           },
         },
