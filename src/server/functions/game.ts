@@ -566,7 +566,7 @@ export const submitContestGuess = createServerFn({
     const isCorrect = checkPlacementCorrect(currentPlayerTimeline, data.position, round.song.releaseYear)
 
     // Store the contest guess
-    await prisma.roundGuess.upsert({
+    const savedGuess = await prisma.roundGuess.upsert({
       where: {
         roundId_playerId: {
           roundId: data.roundId,
@@ -585,6 +585,15 @@ export const submitContestGuess = createServerFn({
         placementCorrect: isCorrect,
         isContest: true,
       },
+    })
+
+    // DEBUG: Verify contest was saved correctly
+    console.log('submitContestGuess saved:', {
+      guessId: savedGuess.id,
+      playerId: savedGuess.playerId,
+      roundId: savedGuess.roundId,
+      isContest: savedGuess.isContest,
+      position: savedGuess.placementPosition,
     })
 
     // Get updated token count
@@ -707,6 +716,23 @@ async function revealResultsInternal(
     isCorrect: originalGuess?.placementCorrect ?? false,
   })
 
+  // DEBUG: Log all guesses and their isContest status
+  console.log('revealResultsInternal debug - ALL GUESSES:', {
+    guessesCount: guesses?.length ?? 0,
+    allGuesses: guesses?.map(g => ({
+      playerId: g.playerId,
+      playerName: g.player?.displayName,
+      isContest: g.isContest,
+      placementPosition: g.placementPosition,
+    })),
+    contestGuessesCount: contestGuesses.length,
+    contestGuesses: contestGuesses.map(g => ({
+      playerId: g.playerId,
+      playerName: g.player?.displayName,
+    })),
+    originalPlayerId: player.id,
+  })
+
   // Process contesters
   for (const contestGuess of contestGuesses) {
     if (contestGuess.placementCorrect) {
@@ -783,6 +809,12 @@ async function revealResultsInternal(
 
   const updatedTimeline = await prisma.timelineEntry.findMany({
     where: { playerId: player.id },
+  })
+
+  // DEBUG: Log final results before sending
+  console.log('revealResultsInternal sending event with contestResults:', {
+    resultsCount: results.length,
+    results: JSON.stringify(results),
   })
 
   // Broadcast results
