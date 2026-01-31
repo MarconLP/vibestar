@@ -1,9 +1,4 @@
 // Room Events (presence-room-{code})
-export interface RoomPlayerReadyEvent {
-  playerId: string
-  isReady: boolean
-}
-
 export interface RoomSettingsUpdatedEvent {
   clipDuration: number
   maxPlayers: number

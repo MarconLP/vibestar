@@ -1191,7 +1191,6 @@ export const PlayerScalarFieldEnum = {
   roomId: 'roomId',
   score: 'score',
   isHost: 'isHost',
-  isReady: 'isReady',
   joinedAt: 'joinedAt'
 } as const
 

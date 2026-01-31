@@ -42,7 +42,6 @@ export type PlayerMinAggregateOutputType = {
   roomId: string | null
   score: number | null
   isHost: boolean | null
-  isReady: boolean | null
   joinedAt: Date | null
 }
 
@@ -54,7 +53,6 @@ export type PlayerMaxAggregateOutputType = {
   roomId: string | null
   score: number | null
   isHost: boolean | null
-  isReady: boolean | null
   joinedAt: Date | null
 }
 
@@ -66,7 +64,6 @@ export type PlayerCountAggregateOutputType = {
   roomId: number
   score: number
   isHost: number
-  isReady: number
   joinedAt: number
   _all: number
 }
@@ -88,7 +85,6 @@ export type PlayerMinAggregateInputType = {
   roomId?: true
   score?: true
   isHost?: true
-  isReady?: true
   joinedAt?: true
 }
 
@@ -100,7 +96,6 @@ export type PlayerMaxAggregateInputType = {
   roomId?: true
   score?: true
   isHost?: true
-  isReady?: true
   joinedAt?: true
 }
 
@@ -112,7 +107,6 @@ export type PlayerCountAggregateInputType = {
   roomId?: true
   score?: true
   isHost?: true
-  isReady?: true
   joinedAt?: true
   _all?: true
 }
@@ -211,7 +205,6 @@ export type PlayerGroupByOutputType = {
   roomId: string
   score: number
   isHost: boolean
-  isReady: boolean
   joinedAt: Date
   _count: PlayerCountAggregateOutputType | null
   _avg: PlayerAvgAggregateOutputType | null
@@ -246,7 +239,6 @@ export type PlayerWhereInput = {
   roomId?: Prisma.StringFilter<"Player"> | string
   score?: Prisma.IntFilter<"Player"> | number
   isHost?: Prisma.BoolFilter<"Player"> | boolean
-  isReady?: Prisma.BoolFilter<"Player"> | boolean
   joinedAt?: Prisma.DateTimeFilter<"Player"> | Date | string
   room?: Prisma.XOR<Prisma.GameRoomScalarRelationFilter, Prisma.GameRoomWhereInput>
   timeline?: Prisma.TimelineEntryListRelationFilter
@@ -261,7 +253,6 @@ export type PlayerOrderByWithRelationInput = {
   roomId?: Prisma.SortOrder
   score?: Prisma.SortOrder
   isHost?: Prisma.SortOrder
-  isReady?: Prisma.SortOrder
   joinedAt?: Prisma.SortOrder
   room?: Prisma.GameRoomOrderByWithRelationInput
   timeline?: Prisma.TimelineEntryOrderByRelationAggregateInput
@@ -280,7 +271,6 @@ export type PlayerWhereUniqueInput = Prisma.AtLeast<{
   roomId?: Prisma.StringFilter<"Player"> | string
   score?: Prisma.IntFilter<"Player"> | number
   isHost?: Prisma.BoolFilter<"Player"> | boolean
-  isReady?: Prisma.BoolFilter<"Player"> | boolean
   joinedAt?: Prisma.DateTimeFilter<"Player"> | Date | string
   room?: Prisma.XOR<Prisma.GameRoomScalarRelationFilter, Prisma.GameRoomWhereInput>
   timeline?: Prisma.TimelineEntryListRelationFilter
@@ -295,7 +285,6 @@ export type PlayerOrderByWithAggregationInput = {
   roomId?: Prisma.SortOrder
   score?: Prisma.SortOrder
   isHost?: Prisma.SortOrder
-  isReady?: Prisma.SortOrder
   joinedAt?: Prisma.SortOrder
   _count?: Prisma.PlayerCountOrderByAggregateInput
   _avg?: Prisma.PlayerAvgOrderByAggregateInput
@@ -315,7 +304,6 @@ export type PlayerScalarWhereWithAggregatesInput = {
   roomId?: Prisma.StringWithAggregatesFilter<"Player"> | string
   score?: Prisma.IntWithAggregatesFilter<"Player"> | number
   isHost?: Prisma.BoolWithAggregatesFilter<"Player"> | boolean
-  isReady?: Prisma.BoolWithAggregatesFilter<"Player"> | boolean
   joinedAt?: Prisma.DateTimeWithAggregatesFilter<"Player"> | Date | string
 }
 
@@ -326,7 +314,6 @@ export type PlayerCreateInput = {
   avatarUrl?: string | null
   score?: number
   isHost?: boolean
-  isReady?: boolean
   joinedAt?: Date | string
   room: Prisma.GameRoomCreateNestedOneWithoutPlayersInput
   timeline?: Prisma.TimelineEntryCreateNestedManyWithoutPlayerInput
@@ -341,7 +328,6 @@ export type PlayerUncheckedCreateInput = {
   roomId: string
   score?: number
   isHost?: boolean
-  isReady?: boolean
   joinedAt?: Date | string
   timeline?: Prisma.TimelineEntryUncheckedCreateNestedManyWithoutPlayerInput
   roundGuesses?: Prisma.RoundGuessUncheckedCreateNestedManyWithoutPlayerInput
@@ -354,7 +340,6 @@ export type PlayerUpdateInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   score?: Prisma.IntFieldUpdateOperationsInput | number
   isHost?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isReady?: Prisma.BoolFieldUpdateOperationsInput | boolean
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   room?: Prisma.GameRoomUpdateOneRequiredWithoutPlayersNestedInput
   timeline?: Prisma.TimelineEntryUpdateManyWithoutPlayerNestedInput
@@ -369,7 +354,6 @@ export type PlayerUncheckedUpdateInput = {
   roomId?: Prisma.StringFieldUpdateOperationsInput | string
   score?: Prisma.IntFieldUpdateOperationsInput | number
   isHost?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isReady?: Prisma.BoolFieldUpdateOperationsInput | boolean
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   timeline?: Prisma.TimelineEntryUncheckedUpdateManyWithoutPlayerNestedInput
   roundGuesses?: Prisma.RoundGuessUncheckedUpdateManyWithoutPlayerNestedInput
@@ -383,7 +367,6 @@ export type PlayerCreateManyInput = {
   roomId: string
   score?: number
   isHost?: boolean
-  isReady?: boolean
   joinedAt?: Date | string
 }
 
@@ -394,7 +377,6 @@ export type PlayerUpdateManyMutationInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   score?: Prisma.IntFieldUpdateOperationsInput | number
   isHost?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isReady?: Prisma.BoolFieldUpdateOperationsInput | boolean
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -406,7 +388,6 @@ export type PlayerUncheckedUpdateManyInput = {
   roomId?: Prisma.StringFieldUpdateOperationsInput | string
   score?: Prisma.IntFieldUpdateOperationsInput | number
   isHost?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isReady?: Prisma.BoolFieldUpdateOperationsInput | boolean
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -433,7 +414,6 @@ export type PlayerCountOrderByAggregateInput = {
   roomId?: Prisma.SortOrder
   score?: Prisma.SortOrder
   isHost?: Prisma.SortOrder
-  isReady?: Prisma.SortOrder
   joinedAt?: Prisma.SortOrder
 }
 
@@ -449,7 +429,6 @@ export type PlayerMaxOrderByAggregateInput = {
   roomId?: Prisma.SortOrder
   score?: Prisma.SortOrder
   isHost?: Prisma.SortOrder
-  isReady?: Prisma.SortOrder
   joinedAt?: Prisma.SortOrder
 }
 
@@ -461,7 +440,6 @@ export type PlayerMinOrderByAggregateInput = {
   roomId?: Prisma.SortOrder
   score?: Prisma.SortOrder
   isHost?: Prisma.SortOrder
-  isReady?: Prisma.SortOrder
   joinedAt?: Prisma.SortOrder
 }
 
@@ -555,7 +533,6 @@ export type PlayerCreateWithoutRoomInput = {
   avatarUrl?: string | null
   score?: number
   isHost?: boolean
-  isReady?: boolean
   joinedAt?: Date | string
   timeline?: Prisma.TimelineEntryCreateNestedManyWithoutPlayerInput
   roundGuesses?: Prisma.RoundGuessCreateNestedManyWithoutPlayerInput
@@ -568,7 +545,6 @@ export type PlayerUncheckedCreateWithoutRoomInput = {
   avatarUrl?: string | null
   score?: number
   isHost?: boolean
-  isReady?: boolean
   joinedAt?: Date | string
   timeline?: Prisma.TimelineEntryUncheckedCreateNestedManyWithoutPlayerInput
   roundGuesses?: Prisma.RoundGuessUncheckedCreateNestedManyWithoutPlayerInput
@@ -611,7 +587,6 @@ export type PlayerScalarWhereInput = {
   roomId?: Prisma.StringFilter<"Player"> | string
   score?: Prisma.IntFilter<"Player"> | number
   isHost?: Prisma.BoolFilter<"Player"> | boolean
-  isReady?: Prisma.BoolFilter<"Player"> | boolean
   joinedAt?: Prisma.DateTimeFilter<"Player"> | Date | string
 }
 
@@ -622,7 +597,6 @@ export type PlayerCreateWithoutTimelineInput = {
   avatarUrl?: string | null
   score?: number
   isHost?: boolean
-  isReady?: boolean
   joinedAt?: Date | string
   room: Prisma.GameRoomCreateNestedOneWithoutPlayersInput
   roundGuesses?: Prisma.RoundGuessCreateNestedManyWithoutPlayerInput
@@ -636,7 +610,6 @@ export type PlayerUncheckedCreateWithoutTimelineInput = {
   roomId: string
   score?: number
   isHost?: boolean
-  isReady?: boolean
   joinedAt?: Date | string
   roundGuesses?: Prisma.RoundGuessUncheckedCreateNestedManyWithoutPlayerInput
 }
@@ -664,7 +637,6 @@ export type PlayerUpdateWithoutTimelineInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   score?: Prisma.IntFieldUpdateOperationsInput | number
   isHost?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isReady?: Prisma.BoolFieldUpdateOperationsInput | boolean
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   room?: Prisma.GameRoomUpdateOneRequiredWithoutPlayersNestedInput
   roundGuesses?: Prisma.RoundGuessUpdateManyWithoutPlayerNestedInput
@@ -678,7 +650,6 @@ export type PlayerUncheckedUpdateWithoutTimelineInput = {
   roomId?: Prisma.StringFieldUpdateOperationsInput | string
   score?: Prisma.IntFieldUpdateOperationsInput | number
   isHost?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isReady?: Prisma.BoolFieldUpdateOperationsInput | boolean
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   roundGuesses?: Prisma.RoundGuessUncheckedUpdateManyWithoutPlayerNestedInput
 }
@@ -690,7 +661,6 @@ export type PlayerCreateWithoutRoundGuessesInput = {
   avatarUrl?: string | null
   score?: number
   isHost?: boolean
-  isReady?: boolean
   joinedAt?: Date | string
   room: Prisma.GameRoomCreateNestedOneWithoutPlayersInput
   timeline?: Prisma.TimelineEntryCreateNestedManyWithoutPlayerInput
@@ -704,7 +674,6 @@ export type PlayerUncheckedCreateWithoutRoundGuessesInput = {
   roomId: string
   score?: number
   isHost?: boolean
-  isReady?: boolean
   joinedAt?: Date | string
   timeline?: Prisma.TimelineEntryUncheckedCreateNestedManyWithoutPlayerInput
 }
@@ -732,7 +701,6 @@ export type PlayerUpdateWithoutRoundGuessesInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   score?: Prisma.IntFieldUpdateOperationsInput | number
   isHost?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isReady?: Prisma.BoolFieldUpdateOperationsInput | boolean
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   room?: Prisma.GameRoomUpdateOneRequiredWithoutPlayersNestedInput
   timeline?: Prisma.TimelineEntryUpdateManyWithoutPlayerNestedInput
@@ -746,7 +714,6 @@ export type PlayerUncheckedUpdateWithoutRoundGuessesInput = {
   roomId?: Prisma.StringFieldUpdateOperationsInput | string
   score?: Prisma.IntFieldUpdateOperationsInput | number
   isHost?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isReady?: Prisma.BoolFieldUpdateOperationsInput | boolean
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   timeline?: Prisma.TimelineEntryUncheckedUpdateManyWithoutPlayerNestedInput
 }
@@ -758,7 +725,6 @@ export type PlayerCreateManyRoomInput = {
   avatarUrl?: string | null
   score?: number
   isHost?: boolean
-  isReady?: boolean
   joinedAt?: Date | string
 }
 
@@ -769,7 +735,6 @@ export type PlayerUpdateWithoutRoomInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   score?: Prisma.IntFieldUpdateOperationsInput | number
   isHost?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isReady?: Prisma.BoolFieldUpdateOperationsInput | boolean
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   timeline?: Prisma.TimelineEntryUpdateManyWithoutPlayerNestedInput
   roundGuesses?: Prisma.RoundGuessUpdateManyWithoutPlayerNestedInput
@@ -782,7 +747,6 @@ export type PlayerUncheckedUpdateWithoutRoomInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   score?: Prisma.IntFieldUpdateOperationsInput | number
   isHost?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isReady?: Prisma.BoolFieldUpdateOperationsInput | boolean
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   timeline?: Prisma.TimelineEntryUncheckedUpdateManyWithoutPlayerNestedInput
   roundGuesses?: Prisma.RoundGuessUncheckedUpdateManyWithoutPlayerNestedInput
@@ -795,7 +759,6 @@ export type PlayerUncheckedUpdateManyWithoutRoomInput = {
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   score?: Prisma.IntFieldUpdateOperationsInput | number
   isHost?: Prisma.BoolFieldUpdateOperationsInput | boolean
-  isReady?: Prisma.BoolFieldUpdateOperationsInput | boolean
   joinedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -847,7 +810,6 @@ export type PlayerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   roomId?: boolean
   score?: boolean
   isHost?: boolean
-  isReady?: boolean
   joinedAt?: boolean
   room?: boolean | Prisma.GameRoomDefaultArgs<ExtArgs>
   timeline?: boolean | Prisma.Player$timelineArgs<ExtArgs>
@@ -863,7 +825,6 @@ export type PlayerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   roomId?: boolean
   score?: boolean
   isHost?: boolean
-  isReady?: boolean
   joinedAt?: boolean
   room?: boolean | Prisma.GameRoomDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["player"]>
@@ -876,7 +837,6 @@ export type PlayerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   roomId?: boolean
   score?: boolean
   isHost?: boolean
-  isReady?: boolean
   joinedAt?: boolean
   room?: boolean | Prisma.GameRoomDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["player"]>
@@ -889,11 +849,10 @@ export type PlayerSelectScalar = {
   roomId?: boolean
   score?: boolean
   isHost?: boolean
-  isReady?: boolean
   joinedAt?: boolean
 }
 
-export type PlayerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "displayName" | "avatarUrl" | "roomId" | "score" | "isHost" | "isReady" | "joinedAt", ExtArgs["result"]["player"]>
+export type PlayerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "userId" | "displayName" | "avatarUrl" | "roomId" | "score" | "isHost" | "joinedAt", ExtArgs["result"]["player"]>
 export type PlayerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   room?: boolean | Prisma.GameRoomDefaultArgs<ExtArgs>
   timeline?: boolean | Prisma.Player$timelineArgs<ExtArgs>
@@ -922,7 +881,6 @@ export type $PlayerPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     roomId: string
     score: number
     isHost: boolean
-    isReady: boolean
     joinedAt: Date
   }, ExtArgs["result"]["player"]>
   composites: {}
@@ -1357,7 +1315,6 @@ export interface PlayerFieldRefs {
   readonly roomId: Prisma.FieldRef<"Player", 'String'>
   readonly score: Prisma.FieldRef<"Player", 'Int'>
   readonly isHost: Prisma.FieldRef<"Player", 'Boolean'>
-  readonly isReady: Prisma.FieldRef<"Player", 'Boolean'>
   readonly joinedAt: Prisma.FieldRef<"Player", 'DateTime'>
 }
     

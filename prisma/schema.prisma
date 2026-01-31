@@ -115,9 +115,8 @@ model Player {
   roomId String
   room   GameRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
-  score   Int     @default(0)
-  isHost  Boolean @default(false)
-  isReady Boolean @default(false)
+  score  Int     @default(0)
+  isHost Boolean @default(false)
 
   joinedAt DateTime @default(now())
 

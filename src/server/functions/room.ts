@@ -7,7 +7,6 @@ import { triggerEvent } from '@/lib/pusher/server'
 import type {
   RoomPlayerJoinedEvent,
   RoomPlayerLeftEvent,
-  RoomPlayerReadyEvent,
 } from '@/lib/pusher/events'
 
 // Get the current user's session
@@ -46,7 +45,6 @@ export const createRoom = createServerFn({
             displayName: session.user.name || 'Anonymous',
             avatarUrl: session.user.image,
             isHost: true,
-            isReady: true,
           },
         },
       },
@@ -184,40 +182,6 @@ export const leaveRoom = createServerFn({
     }
 
     return { success: true }
-  })
-
-// Set player ready status
-export const setPlayerReady = createServerFn({
-  method: 'POST',
-})
-  .inputValidator((data: { roomId: string; isReady: boolean }) => data)
-  .handler(async ({ data }) => {
-    const session = await getSession()
-    if (!session?.user) {
-      throw new Error('Unauthorized')
-    }
-
-    const player = await prisma.player.update({
-      where: {
-        userId_roomId: {
-          userId: session.user.id,
-          roomId: data.roomId,
-        },
-      },
-      data: { isReady: data.isReady },
-      include: { room: true },
-    })
-
-    await triggerEvent(
-      `presence-room-${player.room.code}`,
-      'room:player-ready',
-      {
-        playerId: player.id,
-        isReady: player.isReady,
-      } satisfies RoomPlayerReadyEvent,
-    )
-
-    return player
   })
 
 // Update room settings (host only)

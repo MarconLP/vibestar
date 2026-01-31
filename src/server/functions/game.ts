@@ -51,11 +51,6 @@ export const startGame = createServerFn({
       throw new Error('Game already started')
     }
 
-    const allReady = room.players.every((p) => p.isReady)
-    if (!allReady) {
-      throw new Error('Not all players are ready')
-    }
-
     if (room.players.length < 1) {
       throw new Error('Need at least 1 player to start')
     }

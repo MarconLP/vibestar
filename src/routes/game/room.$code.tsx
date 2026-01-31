@@ -6,7 +6,6 @@ import { startGame } from '@/server/functions/game'
 import { getPlaylists, importPlaylist } from '@/server/functions/playlist'
 import { usePresenceChannel, useChannel } from '@/hooks/usePusher'
 import type {
-  RoomPlayerReadyEvent,
   RoomPlayerJoinedEvent,
   RoomPlayerLeftEvent,
   RoomGameStartedEvent,
@@ -47,19 +46,10 @@ function RoomLobby() {
   const { bind, unbind } = useChannel(`presence-room-${room.code}`)
 
   useEffect(() => {
-    bind<RoomPlayerReadyEvent>('room:player-ready', (data) => {
-      setRoom((prev) => ({
-        ...prev,
-        players: prev.players.map((p) =>
-          p.id === data.playerId ? { ...p, isReady: data.isReady } : p
-        ),
-      }))
-    })
-
     bind<RoomPlayerJoinedEvent>('room:player-joined', (data) => {
       setRoom((prev) => ({
         ...prev,
-        players: [...prev.players, { ...data.player, isReady: false, isHost: false, score: 0, joinedAt: new Date(), roomId: prev.id, userId: '', avatarUrl: data.player.avatarUrl ?? null }],
+        players: [...prev.players, { ...data.player, isHost: false, score: 0, joinedAt: new Date(), roomId: prev.id, userId: '', avatarUrl: data.player.avatarUrl ?? null }],
       }))
     })
 
@@ -75,7 +65,6 @@ function RoomLobby() {
     })
 
     return () => {
-      unbind('room:player-ready')
       unbind('room:player-joined')
       unbind('room:player-left')
       unbind('room:game-started')
@@ -136,8 +125,7 @@ function RoomLobby() {
   }
 
   const isHost = room.players.find((p) => p.isHost)?.userId === myId
-  const allReady = room.players.every((p) => p.isReady)
-  const canStart = isHost && allReady && selectedPlaylistId && room.players.length >= 1
+  const canStart = isHost && selectedPlaylistId && room.players.length >= 1
 
   return (
     <div
@@ -195,32 +183,19 @@ function RoomLobby() {
               {room.players.map((player) => (
                 <div
                   key={player.id}
-                  className="flex items-center justify-between p-3 rounded-lg bg-white/5"
+                  className="flex items-center gap-3 p-3 rounded-lg bg-white/5"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
-                      {player.displayName[0]?.toUpperCase()}
-                    </div>
-                    <div>
-                      <p className="text-white font-medium">
-                        {player.displayName}
-                        {player.isHost && (
-                          <span className="ml-2 text-xs bg-purple-500/30 text-purple-300 px-2 py-0.5 rounded">
-                            Host
-                          </span>
-                        )}
-                      </p>
-                    </div>
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">
+                    {player.displayName[0]?.toUpperCase()}
                   </div>
-                  <div
-                    className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      player.isReady
-                        ? 'bg-green-500/20 text-green-400'
-                        : 'bg-gray-500/20 text-gray-400'
-                    }`}
-                  >
-                    {player.isReady ? 'Ready' : 'Not Ready'}
-                  </div>
+                  <p className="text-white font-medium">
+                    {player.displayName}
+                    {player.isHost && (
+                      <span className="ml-2 text-xs bg-purple-500/30 text-purple-300 px-2 py-0.5 rounded">
+                        Host
+                      </span>
+                    )}
+                  </p>
                 </div>
               ))}
             </div>
@@ -335,13 +310,9 @@ function RoomLobby() {
                 </>
               )}
             </button>
-            {!canStart && (
+            {!selectedPlaylistId && (
               <p className="mt-2 text-center text-sm text-gray-500">
-                {!selectedPlaylistId
-                  ? 'Select a playlist to continue'
-                  : !allReady
-                  ? 'Waiting for all players to be ready'
-                  : ''}
+                Select a playlist to continue
               </p>
             )}
           </div>
