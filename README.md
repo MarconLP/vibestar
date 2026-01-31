@@ -1,353 +1,204 @@
-Welcome to your new TanStack app! 
+# Vibestar
 
-# Getting Started
+A real-time multiplayer music timeline game where players test their knowledge of songs and their release years.
 
-To run this application:
+## What is Vibestar?
+
+Players import YouTube Music playlists, listen to song clips, guess song names, and place them on a chronological timeline. The first player to correctly place 10 songs on their timeline wins.
+
+## Features
+
+- **Real-time Multiplayer** - 1-10 players per room with instant synchronization
+- **YouTube Playlist Integration** - Import any YouTube Music playlist
+- **Song Guessing** - Listen to randomized clips and guess the song name
+- **Timeline Placement** - Place songs chronologically based on release year
+- **Contest System** - Spend tokens to challenge other players' placements
+- **Anonymous Play** - No account required (Google OAuth optional)
+
+## Tech Stack
+
+| Category | Technology |
+|----------|------------|
+| Framework | TanStack React Start |
+| Frontend | React 19, TypeScript, Tailwind CSS 4 |
+| Database | PostgreSQL + Prisma ORM |
+| Auth | Better Auth (Anonymous + Google OAuth) |
+| Real-time | Pusher WebSockets |
+| External APIs | YouTube Data API v3 |
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+
+- PostgreSQL database
+- [Pusher account](https://pusher.com/)
+- [YouTube Data API key](https://console.cloud.google.com/)
+- (Optional) Google OAuth credentials
+
+### Environment Variables
+
+Create a `.env` file:
+
+```env
+# Database
+DATABASE_URL="postgresql://user:password@host/dbname"
+
+# Better Auth
+BETTER_AUTH_URL="http://localhost:3000"
+BETTER_AUTH_SECRET="your-secret-here"
+
+# Google OAuth (optional)
+GOOGLE_CLIENT_ID="your-client-id"
+GOOGLE_CLIENT_SECRET="your-client-secret"
+
+# Pusher
+PUSHER_APP_ID="your-app-id"
+PUSHER_KEY="your-key"
+PUSHER_SECRET="your-secret"
+PUSHER_CLUSTER="eu"
+VITE_PUSHER_KEY="your-key"
+VITE_PUSHER_CLUSTER="eu"
+
+# YouTube
+YOUTUBE_API_KEY="your-api-key"
+```
+
+### Installation
 
 ```bash
+# Install dependencies
 npm install
+
+# Generate Prisma client
+npm run db:generate
+
+# Push database schema
+npm run db:push
+
+# Start development server
 npm run dev
 ```
 
-# Building For Production
+The app will be available at `http://localhost:3000`.
 
-To build this application for production:
+## How to Play
+
+1. **Create a Room** - Set your display name and create a new game room
+2. **Share the Code** - Give the 6-character room code to friends
+3. **Import a Playlist** - Host imports a YouTube Music playlist
+4. **Start the Game** - Host clicks "Start Game" when everyone is ready
+
+### Each Round
+
+1. **Listen** - A random clip from the playlist plays (10-30 seconds)
+2. **Guess** - Type the song name (fuzzy matching is forgiving)
+3. **Place** - Put the song on your timeline where you think it belongs chronologically
+4. **Contest** - Other players can spend tokens to bet on a different position
+5. **Reveal** - See who got it right and earn points/tokens
+
+### Scoring
+
+- **Correct song name** → +1 token (use to contest)
+- **Correct timeline placement** → +1 point (song added to timeline)
+- **Win condition** → First to 10 songs on timeline
+
+## Project Structure
+
+```
+src/
+├── routes/              # File-based routing
+│   ├── index.tsx        # Landing page
+│   ├── create.tsx       # Create room
+│   ├── join.tsx         # Join room
+│   ├── room.$code.tsx   # Room lobby
+│   └── play.$gameId.tsx # Game play
+├── components/
+│   └── game/            # Game components
+│       ├── Timeline.tsx
+│       ├── YouTubePlayer.tsx
+│       ├── SongGuesser.tsx
+│       ├── RoundResult.tsx
+│       └── Scoreboard.tsx
+├── server/functions/    # Server functions
+│   ├── game.ts          # Game logic
+│   ├── room.ts          # Room management
+│   └── playlist.ts      # Playlist import
+├── lib/
+│   ├── game/            # Game utilities
+│   ├── youtube/         # YouTube API
+│   ├── pusher/          # Real-time events
+│   └── auth.ts          # Authentication
+└── hooks/
+    └── usePusher.ts     # Pusher React hooks
+```
+
+## Database Schema
+
+### Core Models
+
+- **Playlist** - Imported YouTube playlists
+- **Song** - Individual tracks with metadata (name, artist, year)
+- **GameRoom** - Multiplayer lobby with room code
+- **Game** - Active game session
+- **Player** - Player in a room with score and tokens
+- **GameRound** - Individual round with clip timing
+- **TimelineEntry** - Songs placed on a player's timeline
+- **RoundGuess** - Player's guess and placement for a round
+
+## Real-time Events
+
+Events are broadcast via Pusher channels:
+
+- `room:player-joined` / `room:player-left` - Player presence
+- `room:game-started` - Game begins
+- `game:round-start` - Clip starts playing
+- `game:contest-window` - Contest period opens
+- `game:contest-submitted` - Another player contested
+- `game:round-result` - Results revealed
+- `game:turn-change` - Next player's turn
+- `game:ended` - Game over
+
+## Scripts
 
 ```bash
-npm run build
+npm run dev        # Start dev server
+npm run build      # Build for production
+npm run preview    # Preview production build
+npm run lint       # Check linting
+npm run format     # Check formatting
+npm run check      # Fix lint & format issues
+npm run test       # Run tests
+
+# Database
+npm run db:generate  # Generate Prisma types
+npm run db:push      # Push schema to database
+npm run db:migrate   # Run migrations
+npm run db:studio    # Open Prisma Studio
 ```
 
-## Testing
+## Game Mechanics
 
-This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
+### Timeline Placement
 
-```bash
-npm run test
-```
+Songs must be placed in chronological order by release year. When placing a song:
+- If correct, it's added to your timeline
+- If incorrect, it's not added (no penalty)
 
-## Styling
+### Contest System
 
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
+During the 15-second contest window:
+- Players with tokens can bet on a different position
+- Costs 1 token (earned from correct song name guesses)
+- If your position is correct, you get the song on your timeline too
+- Multiple players can win the same song
 
+### Clip Generation
 
-## Linting & Formatting
+- Clips are 10-30 seconds (host configurable)
+- Start time avoids intro (first 30s) and outro (last 10s)
+- Randomized within the safe zone
 
+## License
 
-This project uses [eslint](https://eslint.org/) and [prettier](https://prettier.io/) for linting and formatting. Eslint is configured using [tanstack/eslint-config](https://tanstack.com/config/latest/docs/eslint). The following scripts are available:
-
-```bash
-npm run lint
-npm run format
-npm run check
-```
-
-
-## T3Env
-
-- You can use T3Env to add type safety to your environment variables.
-- Add Environment variables to the `src/env.mjs` file.
-- Use the environment variables in your code.
-
-### Usage
-
-```ts
-import { env } from "@/env";
-
-console.log(env.VITE_APP_TITLE);
-```
-
-
-
-
-
-## Setting up Better Auth
-
-1. Generate and set the `BETTER_AUTH_SECRET` environment variable in your `.env.local`:
-
-   ```bash
-   npx @better-auth/cli secret
-   ```
-
-2. Visit the [Better Auth documentation](https://www.better-auth.com) to unlock the full potential of authentication in your app.
-
-### Adding a Database (Optional)
-
-Better Auth can work in stateless mode, but to persist user data, add a database:
-
-```typescript
-// src/lib/auth.ts
-import { betterAuth } from "better-auth";
-import { Pool } from "pg";
-
-export const auth = betterAuth({
-  database: new Pool({
-    connectionString: process.env.DATABASE_URL,
-  }),
-  // ... rest of config
-});
-```
-
-Then run migrations:
-
-```bash
-npx @better-auth/cli migrate
-```
-
-
-
-## Routing
-This project uses [TanStack Router](https://tanstack.com/router). The initial setup is a file based router. Which means that the routes are managed as files in `src/routes`.
-
-### Adding A Route
-
-To add a new route to your application just add another a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from "@tanstack/react-router";
-```
-
-Then anywhere in your JSX you can use it like so:
-
-```tsx
-<Link to="/about">About</Link>
-```
-
-This will create a link that will navigate to the `/about` route.
-
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
-
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you use the `<Outlet />` component.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { Outlet, createRootRoute } from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
-
-import { Link } from "@tanstack/react-router";
-
-export const Route = createRootRoute({
-  component: () => (
-    <>
-      <header>
-        <nav>
-          <Link to="/">Home</Link>
-          <Link to="/about">About</Link>
-        </nav>
-      </header>
-      <Outlet />
-      <TanStackRouterDevtools />
-    </>
-  ),
-})
-```
-
-The `<TanStackRouterDevtools />` component is not required so you can remove it if you don't want it in your layout.
-
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-const peopleRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/people",
-  loader: async () => {
-    const response = await fetch("https://swapi.dev/api/people");
-    return response.json() as Promise<{
-      results: {
-        name: string;
-      }[];
-    }>;
-  },
-  component: () => {
-    const data = peopleRoute.useLoaderData();
-    return (
-      <ul>
-        {data.results.map((person) => (
-          <li key={person.name}>{person.name}</li>
-        ))}
-      </ul>
-    );
-  },
-});
-```
-
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
-
-### React-Query
-
-React-Query is an excellent addition or alternative to route loading and integrating it into you application is a breeze.
-
-First add your dependencies:
-
-```bash
-npm install @tanstack/react-query @tanstack/react-query-devtools
-```
-
-Next we'll need to create a query client and provider. We recommend putting those in `main.tsx`.
-
-```tsx
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-
-// ...
-
-const queryClient = new QueryClient();
-
-// ...
-
-if (!rootElement.innerHTML) {
-  const root = ReactDOM.createRoot(rootElement);
-
-  root.render(
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-    </QueryClientProvider>
-  );
-}
-```
-
-You can also add TanStack Query Devtools to the root route (optional).
-
-```tsx
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-
-const rootRoute = createRootRoute({
-  component: () => (
-    <>
-      <Outlet />
-      <ReactQueryDevtools buttonPosition="top-right" />
-      <TanStackRouterDevtools />
-    </>
-  ),
-});
-```
-
-Now you can use `useQuery` to fetch your data.
-
-```tsx
-import { useQuery } from "@tanstack/react-query";
-
-import "./App.css";
-
-function App() {
-  const { data } = useQuery({
-    queryKey: ["people"],
-    queryFn: () =>
-      fetch("https://swapi.dev/api/people")
-        .then((res) => res.json())
-        .then((data) => data.results as { name: string }[]),
-    initialData: [],
-  });
-
-  return (
-    <div>
-      <ul>
-        {data.map((person) => (
-          <li key={person.name}>{person.name}</li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-export default App;
-```
-
-You can find out everything you need to know on how to use React-Query in the [React-Query documentation](https://tanstack.com/query/latest/docs/framework/react/overview).
-
-## State Management
-
-Another common requirement for React applications is state management. There are many options for state management in React. TanStack Store provides a great starting point for your project.
-
-First you need to add TanStack Store as a dependency:
-
-```bash
-npm install @tanstack/store
-```
-
-Now let's create a simple counter in the `src/App.tsx` file as a demonstration.
-
-```tsx
-import { useStore } from "@tanstack/react-store";
-import { Store } from "@tanstack/store";
-import "./App.css";
-
-const countStore = new Store(0);
-
-function App() {
-  const count = useStore(countStore);
-  return (
-    <div>
-      <button onClick={() => countStore.setState((n) => n + 1)}>
-        Increment - {count}
-      </button>
-    </div>
-  );
-}
-
-export default App;
-```
-
-One of the many nice features of TanStack Store is the ability to derive state from other state. That derived state will update when the base state updates.
-
-Let's check this out by doubling the count using derived state.
-
-```tsx
-import { useStore } from "@tanstack/react-store";
-import { Store, Derived } from "@tanstack/store";
-import "./App.css";
-
-const countStore = new Store(0);
-
-const doubledStore = new Derived({
-  fn: () => countStore.state * 2,
-  deps: [countStore],
-});
-doubledStore.mount();
-
-function App() {
-  const count = useStore(countStore);
-  const doubledCount = useStore(doubledStore);
-
-  return (
-    <div>
-      <button onClick={() => countStore.setState((n) => n + 1)}>
-        Increment - {count}
-      </button>
-      <div>Doubled - {doubledCount}</div>
-    </div>
-  );
-}
-
-export default App;
-```
-
-We use the `Derived` class to create a new store that is derived from another store. The `Derived` class has a `mount` method that will start the derived store updating.
-
-Once we've created the derived store we can use it in the `App` component just like we would any other store using the `useStore` hook.
-
-You can find out everything you need to know on how to use TanStack Store in the [TanStack Store documentation](https://tanstack.com/store/latest).
-
-# Demo files
-
-Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
-
-# Learn More
-
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
+MIT
