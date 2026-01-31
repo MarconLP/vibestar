@@ -4,7 +4,11 @@ import { prisma } from '@/db'
 import { auth } from '@/lib/auth'
 import { generateRoomCode } from '@/lib/game/utils'
 import { triggerEvent } from '@/lib/pusher/server'
-import type { RoomPlayerJoinedEvent, RoomPlayerLeftEvent, RoomPlayerReadyEvent } from '@/lib/pusher/events'
+import type {
+  RoomPlayerJoinedEvent,
+  RoomPlayerLeftEvent,
+  RoomPlayerReadyEvent,
+} from '@/lib/pusher/events'
 
 // Get the current user's session
 async function getSession() {
@@ -17,9 +21,10 @@ export const createRoom = createServerFn({
   method: 'POST',
 })
   .inputValidator(
-    (data: { clipDuration?: number; maxPlayers?: number }) => data
+    (data: { clipDuration?: number; maxPlayers?: number }) => data,
   )
   .handler(async ({ data }) => {
+    console.log(process.env.DATABASE_URL)
     const session = await getSession()
     if (!session?.user) {
       throw new Error('Unauthorized')
@@ -203,10 +208,14 @@ export const setPlayerReady = createServerFn({
       include: { room: true },
     })
 
-    await triggerEvent(`presence-room-${player.room.code}`, 'room:player-ready', {
-      playerId: player.id,
-      isReady: player.isReady,
-    } satisfies RoomPlayerReadyEvent)
+    await triggerEvent(
+      `presence-room-${player.room.code}`,
+      'room:player-ready',
+      {
+        playerId: player.id,
+        isReady: player.isReady,
+      } satisfies RoomPlayerReadyEvent,
+    )
 
     return player
   })
@@ -216,7 +225,8 @@ export const updateRoomSettings = createServerFn({
   method: 'POST',
 })
   .inputValidator(
-    (data: { roomId: string; clipDuration?: number; maxPlayers?: number }) => data
+    (data: { roomId: string; clipDuration?: number; maxPlayers?: number }) =>
+      data,
   )
   .handler(async ({ data }) => {
     const session = await getSession()
