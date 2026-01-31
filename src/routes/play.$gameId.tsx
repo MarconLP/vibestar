@@ -141,11 +141,17 @@ function GamePlay() {
     })
 
     bind<GameContestSubmittedEvent>('game:contest-submitted', (data) => {
-      setContestSubmissions((prev) => [...prev, {
-        contesterId: data.contesterId,
-        contesterName: data.contesterName,
-        position: data.position,
-      }])
+      setContestSubmissions((prev) => {
+        // Prevent duplicate entries if event fires twice
+        if (prev.some(s => s.contesterId === data.contesterId)) {
+          return prev
+        }
+        return [...prev, {
+          contesterId: data.contesterId,
+          contesterName: data.contesterName,
+          position: data.position,
+        }]
+      })
 
       // Update contester's token count
       setPlayers((prev) =>
