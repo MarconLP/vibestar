@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Volume2, VolumeX, Play, Pause } from 'lucide-react'
+import { Music } from 'lucide-react'
 
 interface YouTubePlayerProps {
   videoId: string
@@ -19,7 +19,6 @@ export function YouTubePlayer({
   const iframeRef = useRef<HTMLIFrameElement>(null)
   const [isPlaying, setIsPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
-  const [isMuted, setIsMuted] = useState(false)
   const intervalRef = useRef<NodeJS.Timeout>(undefined)
   const startTimeRef = useRef<number>(undefined)
 
@@ -53,7 +52,7 @@ export function YouTubePlayer({
   }, [clipDuration, onClipEnd])
 
   // YouTube embed URL with autoplay and time restrictions
-  const embedUrl = `https://www.youtube.com/embed/${videoId}?start=${startTime}&end=${endTime}&autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0&mute=${isMuted ? 1 : 0}`
+  const embedUrl = `https://www.youtube.com/embed/${videoId}?start=${startTime}&end=${endTime}&autoplay=1&controls=0&modestbranding=1&rel=0&showinfo=0`
 
   return (
     <div
@@ -67,20 +66,24 @@ export function YouTubePlayer({
         {isMyTurn ? 'Listen to the clip' : 'Listening...'}
       </h2>
 
-      {/* Video container - small preview */}
-      <div className="relative w-full max-w-xs mx-auto mb-6">
-        <div className="aspect-video rounded-lg overflow-hidden bg-black/50">
-          <iframe
-            ref={iframeRef}
-            src={embedUrl}
-            className="w-full h-full"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-        </div>
+      {/* Hidden YouTube player for audio only */}
+      <div className="absolute -left-[9999px] w-0 h-0 overflow-hidden">
+        <iframe
+          ref={iframeRef}
+          src={embedUrl}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        />
+      </div>
 
-        {/* Overlay to prevent seeking */}
-        <div className="absolute inset-0 bg-transparent" />
+      {/* Audio visualization */}
+      <div className="flex justify-center mb-6">
+        <div className={`w-24 h-24 rounded-full flex items-center justify-center ${
+          isPlaying
+            ? 'bg-gradient-to-r from-purple-500 to-pink-500 animate-pulse'
+            : 'bg-white/10'
+        }`}>
+          <Music className="w-10 h-10 text-white" />
+        </div>
       </div>
 
       {/* Progress bar */}
@@ -95,36 +98,6 @@ export function YouTubePlayer({
             style={{ width: `${progress}%` }}
           />
         </div>
-      </div>
-
-      {/* Controls */}
-      <div className="flex items-center justify-center gap-4">
-        <button
-          onClick={() => setIsMuted(!isMuted)}
-          className="p-3 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-        >
-          {isMuted ? (
-            <VolumeX className="w-5 h-5 text-gray-400" />
-          ) : (
-            <Volume2 className="w-5 h-5 text-white" />
-          )}
-        </button>
-
-        <div
-          className={`p-4 rounded-full ${
-            isPlaying
-              ? 'bg-gradient-to-r from-purple-500 to-pink-500 animate-pulse'
-              : 'bg-white/20'
-          }`}
-        >
-          {isPlaying ? (
-            <Pause className="w-6 h-6 text-white" />
-          ) : (
-            <Play className="w-6 h-6 text-white" />
-          )}
-        </div>
-
-        <div className="w-11" /> {/* Spacer for centering */}
       </div>
 
       {isMyTurn && (

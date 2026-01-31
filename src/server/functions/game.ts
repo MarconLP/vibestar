@@ -65,7 +65,10 @@ export const startGame = createServerFn({
       throw new Error('Playlist not found')
     }
 
-    const totalRounds = data.totalRounds ?? Math.min(10, playlist.songs.length - room.players.length)
+    // Each player gets their own unique song per turn
+    // turnsPerPlayer = how many turns each player gets
+    const turnsPerPlayer = data.totalRounds ?? Math.min(5, Math.floor((playlist.songs.length - room.players.length) / room.players.length))
+    const totalRounds = turnsPerPlayer * room.players.length
 
     if (playlist.songs.length < totalRounds + room.players.length) {
       throw new Error('Not enough songs in playlist')
@@ -483,6 +486,7 @@ export const submitPlacement = createServerFn({
   })
 
 // Advance the game to next turn or end
+// Each turn = new round = new song for the next player
 async function advanceGame(gameId: string, currentRoundNumber: number) {
   const game = await prisma.game.findUnique({
     where: { id: gameId },
@@ -499,84 +503,67 @@ async function advanceGame(gameId: string, currentRoundNumber: number) {
   const currentPlayerIndex = players.findIndex((p) => p.id === game.currentPlayerId)
   const nextPlayerIndex = (currentPlayerIndex + 1) % players.length
 
-  // Check if we've completed a full cycle of turns
-  const isEndOfRound = nextPlayerIndex === 0
+  // Mark current round as completed
+  await prisma.gameRound.update({
+    where: {
+      gameId_roundNumber: {
+        gameId,
+        roundNumber: currentRoundNumber,
+      },
+    },
+    data: {
+      status: 'COMPLETED',
+      endedAt: new Date(),
+    },
+  })
 
-  if (isEndOfRound) {
-    // Move to next round or end game
-    if (currentRoundNumber >= game.totalRounds) {
-      // Game over
-      await prisma.game.update({
-        where: { id: gameId },
-        data: {
-          status: 'FINISHED',
-          endedAt: new Date(),
-        },
-      })
-
-      await prisma.gameRoom.update({
-        where: { id: game.roomId },
-        data: { status: 'FINISHED' },
-      })
-
-      // Determine winner
-      const sortedPlayers = [...players].sort((a, b) => b.score - a.score)
-      const winner = sortedPlayers[0]
-
-      await triggerEvent(`private-game-${gameId}`, 'game:ended', {
-        winner: {
-          playerId: winner.id,
-          displayName: winner.displayName,
-          score: winner.score,
-        },
-        finalScores: sortedPlayers.map((p) => ({
-          playerId: p.id,
-          displayName: p.displayName,
-          score: p.score,
-        })),
-      } satisfies GameEndedEvent)
-    } else {
-      // Start next round
-      const nextRound = currentRoundNumber + 1
-
-      await prisma.game.update({
-        where: { id: gameId },
-        data: {
-          currentRound: nextRound,
-          currentPlayerId: players[0].id,
-        },
-      })
-
-      await prisma.gameRound.update({
-        where: {
-          gameId_roundNumber: {
-            gameId,
-            roundNumber: currentRoundNumber,
-          },
-        },
-        data: {
-          status: 'COMPLETED',
-          endedAt: new Date(),
-        },
-      })
-
-      await triggerEvent(`private-game-${gameId}`, 'game:turn-change', {
-        currentPlayerId: players[0].id,
-        roundNumber: nextRound,
-      } satisfies GameTurnChangeEvent)
-    }
-  } else {
-    // Same round, next player's turn
+  // Check if game is over
+  if (currentRoundNumber >= game.totalRounds) {
+    // Game over
     await prisma.game.update({
       where: { id: gameId },
       data: {
+        status: 'FINISHED',
+        endedAt: new Date(),
+      },
+    })
+
+    await prisma.gameRoom.update({
+      where: { id: game.roomId },
+      data: { status: 'FINISHED' },
+    })
+
+    // Determine winner
+    const sortedPlayers = [...players].sort((a, b) => b.score - a.score)
+    const winner = sortedPlayers[0]
+
+    await triggerEvent(`private-game-${gameId}`, 'game:ended', {
+      winner: {
+        playerId: winner.id,
+        displayName: winner.displayName,
+        score: winner.score,
+      },
+      finalScores: sortedPlayers.map((p) => ({
+        playerId: p.id,
+        displayName: p.displayName,
+        score: p.score,
+      })),
+    } satisfies GameEndedEvent)
+  } else {
+    // Move to next round with next player (each turn = new song)
+    const nextRound = currentRoundNumber + 1
+
+    await prisma.game.update({
+      where: { id: gameId },
+      data: {
+        currentRound: nextRound,
         currentPlayerId: players[nextPlayerIndex].id,
       },
     })
 
     await triggerEvent(`private-game-${gameId}`, 'game:turn-change', {
       currentPlayerId: players[nextPlayerIndex].id,
-      roundNumber: currentRoundNumber,
+      roundNumber: nextRound,
     } satisfies GameTurnChangeEvent)
   }
 }
