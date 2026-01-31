@@ -54,12 +54,15 @@ export function fuzzyMatch(guess: string, actual: string): boolean {
     return false
   }
 
-  // Check if guess contains actual or vice versa
-  if (normalizedActual.includes(normalizedGuess) || normalizedGuess.includes(normalizedActual)) {
+  // Check if guess contains the actual song name (user added extra info like artist)
+  if (normalizedGuess.includes(normalizedActual)) {
+    return true
+  }
+
+  // Check if actual contains the guess (partial match)
+  if (normalizedActual.includes(normalizedGuess)) {
     // Only accept if the guess is at least 60% of the actual length
-    const minLength = Math.min(normalizedGuess.length, normalizedActual.length)
-    const maxLength = Math.max(normalizedGuess.length, normalizedActual.length)
-    if (minLength / maxLength >= 0.6) {
+    if (normalizedGuess.length / normalizedActual.length >= 0.6) {
       return true
     }
   }
