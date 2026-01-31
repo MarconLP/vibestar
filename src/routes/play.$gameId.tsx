@@ -193,131 +193,110 @@ function GamePlay() {
   const currentPlayerName = players.find((p) => p.id === currentPlayerId)?.displayName || 'Unknown'
 
   return (
-    <div
-      className="min-h-screen p-4"
-      style={{
-        background: 'linear-gradient(135deg, #0c1a2b 0%, #1a2332 50%, #16202e 100%)',
-      }}
-    >
-      <div className="max-w-6xl mx-auto">
-        {/* Game Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="text-white">
-            <h1 className="text-2xl font-bold">Round {currentRoundNumber} / {game.totalRounds}</h1>
-            <p className="text-gray-400">
-              {isMyTurn ? "Your turn!" : `${currentPlayerName}'s turn`}
-            </p>
+    <div className="min-h-screen bg-neutral-950 text-white overflow-hidden relative">
+      {/* Background Effects */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-green-900/20 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-neutral-800/30 rounded-full blur-[120px]" />
+      </div>
+
+      <div className="relative z-10 min-h-screen p-4">
+        <div className="max-w-6xl mx-auto">
+          {/* Game Header */}
+          <div className="flex items-center justify-between mb-6">
+            <div className="text-white">
+              <h1 className="text-2xl font-bold">Round {currentRoundNumber} / {game.totalRounds}</h1>
+              <p className="text-neutral-400">
+                {isMyTurn ? "Your turn!" : `${currentPlayerName}'s turn`}
+              </p>
+            </div>
+            <Scoreboard players={players} currentPlayerId={currentPlayerId} />
           </div>
-          <Scoreboard players={players} currentPlayerId={currentPlayerId} />
-        </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Main Game Area */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Waiting State */}
-            {phase === 'WAITING' && (
-              <div
-                className="p-8 rounded-xl border text-center"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(22, 32, 46, 0.95) 0%, rgba(12, 26, 43, 0.95) 100%)',
-                  borderColor: 'rgba(139, 92, 246, 0.2)',
-                }}
-              >
-                {isMyTurn ? (
-                  <>
-                    <p className="text-white text-lg mb-4">Ready to hear the next song?</p>
-                    <button
-                      onClick={handleStartRound}
-                      className="px-6 py-3 rounded-xl font-semibold bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:scale-105 transition-transform"
-                    >
-                      Play Clip
-                    </button>
-                  </>
-                ) : (
-                  <p className="text-gray-400 text-lg">
-                    Waiting for {currentPlayerName} to play the clip...
-                  </p>
-                )}
-              </div>
-            )}
+          <div className="grid lg:grid-cols-3 gap-6">
+            {/* Main Game Area */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Waiting State */}
+              {phase === 'WAITING' && (
+                <div className="p-8 rounded-2xl bg-neutral-900/50 border border-white/10 backdrop-blur-sm text-center">
+                  {isMyTurn ? (
+                    <>
+                      <p className="text-white text-lg mb-4">Ready to hear the next song?</p>
+                      <button
+                        onClick={handleStartRound}
+                        className="px-6 py-3 rounded-xl font-semibold bg-green-500 text-black hover:bg-green-400 hover:scale-105 transition-all"
+                      >
+                        Play Clip
+                      </button>
+                    </>
+                  ) : (
+                    <p className="text-neutral-400 text-lg">
+                      Waiting for {currentPlayerName} to play the clip...
+                    </p>
+                  )}
+                </div>
+              )}
 
-            {/* Playing Clip */}
-            {phase === 'PLAYING_CLIP' && currentRound && (
-              <YouTubePlayer
-                videoId={currentRound.videoId}
-                startTime={currentRound.clipStartTime}
-                endTime={currentRound.clipEndTime}
-                onClipEnd={() => isMyTurn && setPhase('GUESSING')}
-                isMyTurn={isMyTurn}
-              />
-            )}
-
-            {/* Guessing Song Name */}
-            {phase === 'GUESSING' && isMyTurn && (
-              <SongGuesser
-                onSubmit={handleGuessSubmit}
-                disabled={guessSubmitted}
-              />
-            )}
-
-            {/* Placing on Timeline */}
-            {phase === 'PLACING' && isMyTurn && (
-              <div
-                className="p-6 rounded-xl border"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(22, 32, 46, 0.95) 0%, rgba(12, 26, 43, 0.95) 100%)',
-                  borderColor: 'rgba(139, 92, 246, 0.2)',
-                }}
-              >
-                <h2 className="text-xl font-bold text-white mb-4">
-                  Place the song on your timeline
-                </h2>
-                <p className="text-gray-400 mb-4">
-                  Click where you think this song belongs based on its release year
-                </p>
-                <Timeline
-                  entries={timeline}
-                  placingMode={true}
-                  onPlacement={handlePlacement}
+              {/* Playing Clip */}
+              {phase === 'PLAYING_CLIP' && currentRound && (
+                <YouTubePlayer
+                  videoId={currentRound.videoId}
+                  startTime={currentRound.clipStartTime}
+                  endTime={currentRound.clipEndTime}
+                  onClipEnd={() => isMyTurn && setPhase('GUESSING')}
+                  isMyTurn={isMyTurn}
                 />
-              </div>
-            )}
+              )}
 
-            {/* Revealing Result */}
-            {phase === 'REVEALING' && roundResult && (
-              <RoundResult
-                result={roundResult}
-                isMyTurn={roundResult.playerId === player?.id}
-                onContinue={handleContinue}
-              />
-            )}
+              {/* Guessing Song Name */}
+              {phase === 'GUESSING' && isMyTurn && (
+                <SongGuesser
+                  onSubmit={handleGuessSubmit}
+                  disabled={guessSubmitted}
+                />
+              )}
 
-            {/* Watching other player */}
-            {!isMyTurn && phase !== 'WAITING' && phase !== 'REVEALING' && (
-              <div
-                className="p-8 rounded-xl border text-center"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(22, 32, 46, 0.95) 0%, rgba(12, 26, 43, 0.95) 100%)',
-                  borderColor: 'rgba(139, 92, 246, 0.2)',
-                }}
-              >
-                <p className="text-gray-400 text-lg">
-                  {currentPlayerName} is {phase === 'PLAYING_CLIP' ? 'listening to the clip' : phase === 'GUESSING' ? 'guessing the song' : 'placing on their timeline'}...
-                </p>
-              </div>
-            )}
-          </div>
+              {/* Placing on Timeline */}
+              {phase === 'PLACING' && isMyTurn && (
+                <div className="p-6 rounded-2xl bg-neutral-900/50 border border-white/10 backdrop-blur-sm">
+                  <h2 className="text-xl font-bold text-white mb-4">
+                    Place the song on your timeline
+                  </h2>
+                  <p className="text-neutral-400 mb-4">
+                    Click where you think this song belongs based on its release year
+                  </p>
+                  <Timeline
+                    entries={timeline}
+                    placingMode={true}
+                    onPlacement={handlePlacement}
+                  />
+                </div>
+              )}
 
-          {/* Timeline Sidebar */}
-          <div
-            className="p-6 rounded-xl border"
-            style={{
-              background: 'linear-gradient(135deg, rgba(22, 32, 46, 0.95) 0%, rgba(12, 26, 43, 0.95) 100%)',
-              borderColor: 'rgba(139, 92, 246, 0.2)',
-            }}
-          >
-            <h2 className="text-xl font-bold text-white mb-4">Your Timeline</h2>
-            <Timeline entries={timeline} placingMode={false} />
+              {/* Revealing Result */}
+              {phase === 'REVEALING' && roundResult && (
+                <RoundResult
+                  result={roundResult}
+                  isMyTurn={roundResult.playerId === player?.id}
+                  onContinue={handleContinue}
+                />
+              )}
+
+              {/* Watching other player */}
+              {!isMyTurn && phase !== 'WAITING' && phase !== 'REVEALING' && (
+                <div className="p-8 rounded-2xl bg-neutral-900/50 border border-white/10 backdrop-blur-sm text-center">
+                  <p className="text-neutral-400 text-lg">
+                    {currentPlayerName} is {phase === 'PLAYING_CLIP' ? 'listening to the clip' : phase === 'GUESSING' ? 'guessing the song' : 'placing on their timeline'}...
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Timeline Sidebar */}
+            <div className="p-6 rounded-2xl bg-neutral-900/50 border border-white/10 backdrop-blur-sm">
+              <h2 className="text-xl font-bold text-white mb-4">Your Timeline</h2>
+              <Timeline entries={timeline} placingMode={false} />
+            </div>
           </div>
         </div>
       </div>
