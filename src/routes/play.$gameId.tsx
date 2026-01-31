@@ -409,17 +409,8 @@ function GamePlay() {
                     <div>
                       <p className="text-neutral-400 mb-4">
                         Other players can contest your placement. You placed the song at position {contestWindow.placementPosition + 1}.
+                        {contestSubmissions.length > 0 && ` (${contestSubmissions.length} contest${contestSubmissions.length > 1 ? 's' : ''} submitted)`}
                       </p>
-                      {contestSubmissions.length > 0 && (
-                        <div className="mb-4 p-3 rounded-xl bg-neutral-800/50">
-                          <p className="text-sm text-neutral-400 mb-2">Contests submitted:</p>
-                          {contestSubmissions.map((sub) => (
-                            <p key={sub.contesterId} className="text-white">
-                              {sub.contesterName} placed at position {sub.position + 1}
-                            </p>
-                          ))}
-                        </div>
-                      )}
                       <Timeline
                         entries={contestWindow.currentPlayerTimeline.map((e, i) => ({
                           ...e,
@@ -427,6 +418,7 @@ function GamePlay() {
                         }))}
                         placingMode={false}
                         guessPosition={contestWindow.placementPosition}
+                        contestVotes={contestSubmissions.map(s => ({ contesterName: s.contesterName, position: s.position }))}
                       />
                       {contestTimeRemaining === 0 && (
                         <button
@@ -462,6 +454,7 @@ function GamePlay() {
                             onPlacement={handleContestSubmit}
                             blockedPosition={contestWindow.placementPosition}
                             guessPosition={contestWindow.placementPosition}
+                            contestVotes={contestSubmissions.map(s => ({ contesterName: s.contesterName, position: s.position }))}
                           />
                           <p className="text-xs text-neutral-500 mt-2 text-center">
                             You have {myTokens} token{myTokens !== 1 ? 's' : ''}. This will cost 1 token.
@@ -477,6 +470,7 @@ function GamePlay() {
                             }))}
                             placingMode={false}
                             guessPosition={contestWindow.placementPosition}
+                            contestVotes={contestSubmissions.map(s => ({ contesterName: s.contesterName, position: s.position }))}
                           />
                         </div>
                       )}

@@ -12,16 +12,26 @@ interface TimelineEntry {
   }
 }
 
+interface ContestVote {
+  contesterName: string
+  position: number
+}
+
 interface TimelineProps {
   entries: TimelineEntry[]
   placingMode?: boolean
   onPlacement?: (position: number) => void
   blockedPosition?: number // Position that cannot be selected (used when contesting a correct placement)
   guessPosition?: number // Position where a player placed their guess (shows a marker)
+  contestVotes?: ContestVote[] // Contest votes from other players
 }
 
-export function Timeline({ entries, placingMode = false, onPlacement, blockedPosition, guessPosition }: TimelineProps) {
+export function Timeline({ entries, placingMode = false, onPlacement, blockedPosition, guessPosition, contestVotes = [] }: TimelineProps) {
   const sortedEntries = [...entries].sort((a, b) => a.position - b.position)
+
+  // Get contest votes for a specific position
+  const getContestVotesForPosition = (position: number) =>
+    contestVotes.filter(v => v.position === position)
 
   if (entries.length === 0 && !placingMode) {
     return (
@@ -40,6 +50,9 @@ export function Timeline({ entries, placingMode = false, onPlacement, blockedPos
       <div className="space-y-2">
         {/* Guess marker or drop zone at the beginning */}
         {guessPosition === 0 && <GuessMarker />}
+        {getContestVotesForPosition(0).map((vote, i) => (
+          <ContestMarker key={`contest-0-${i}`} contesterName={vote.contesterName} />
+        ))}
         {placingMode && (
           <DropZone position={0} onDrop={onPlacement} label="Before all" blocked={blockedPosition === 0} />
         )}
@@ -50,6 +63,9 @@ export function Timeline({ entries, placingMode = false, onPlacement, blockedPos
 
             {/* Guess marker or drop zone after each entry */}
             {guessPosition === index + 1 && <GuessMarker />}
+            {getContestVotesForPosition(index + 1).map((vote, i) => (
+              <ContestMarker key={`contest-${index + 1}-${i}`} contesterName={vote.contesterName} />
+            ))}
             {placingMode && (
               <DropZone
                 position={index + 1}
@@ -107,6 +123,19 @@ function GuessMarker() {
 
       <div className="flex items-center justify-center gap-2 p-2 rounded-xl border-2 border-yellow-500/50 bg-yellow-500/10">
         <span className="text-sm font-medium text-yellow-400">Their guess</span>
+      </div>
+    </div>
+  )
+}
+
+function ContestMarker({ contesterName }: { contesterName: string }) {
+  return (
+    <div className="relative w-full pl-10 py-1">
+      {/* Connector dot */}
+      <div className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-purple-500 ring-4 ring-purple-500/20 animate-pulse" />
+
+      <div className="flex items-center justify-center gap-2 p-2 rounded-xl border-2 border-purple-500/50 bg-purple-500/10">
+        <span className="text-sm font-medium text-purple-400">{contesterName}'s contest</span>
       </div>
     </div>
   )
