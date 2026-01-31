@@ -1,4 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
+import { getRequest } from '@tanstack/start-server-core'
 import { prisma } from '@/db'
 import { auth } from '@/lib/auth'
 import { generateRoomCode } from '@/lib/game/utils'
@@ -6,7 +7,8 @@ import { triggerEvent } from '@/lib/pusher/server'
 import type { RoomPlayerJoinedEvent, RoomPlayerLeftEvent, RoomPlayerReadyEvent } from '@/lib/pusher/events'
 
 // Get the current user's session
-async function getSession(request: Request) {
+async function getSession() {
+  const request = getRequest()
   return await auth.api.getSession({ headers: request.headers })
 }
 
@@ -17,8 +19,8 @@ export const createRoom = createServerFn({
   .inputValidator(
     (data: { clipDuration?: number; maxPlayers?: number }) => data
   )
-  .handler(async ({ data, request }) => {
-    const session = await getSession(request)
+  .handler(async ({ data }) => {
+    const session = await getSession()
     if (!session?.user) {
       throw new Error('Unauthorized')
     }
@@ -75,8 +77,8 @@ export const joinRoom = createServerFn({
   method: 'POST',
 })
   .inputValidator((data: { code: string }) => data)
-  .handler(async ({ data, request }) => {
-    const session = await getSession(request)
+  .handler(async ({ data }) => {
+    const session = await getSession()
     if (!session?.user) {
       throw new Error('Unauthorized')
     }
@@ -135,8 +137,8 @@ export const leaveRoom = createServerFn({
   method: 'POST',
 })
   .inputValidator((data: { roomId: string }) => data)
-  .handler(async ({ data, request }) => {
-    const session = await getSession(request)
+  .handler(async ({ data }) => {
+    const session = await getSession()
     if (!session?.user) {
       throw new Error('Unauthorized')
     }
@@ -184,8 +186,8 @@ export const setPlayerReady = createServerFn({
   method: 'POST',
 })
   .inputValidator((data: { roomId: string; isReady: boolean }) => data)
-  .handler(async ({ data, request }) => {
-    const session = await getSession(request)
+  .handler(async ({ data }) => {
+    const session = await getSession()
     if (!session?.user) {
       throw new Error('Unauthorized')
     }
@@ -216,8 +218,8 @@ export const updateRoomSettings = createServerFn({
   .inputValidator(
     (data: { roomId: string; clipDuration?: number; maxPlayers?: number }) => data
   )
-  .handler(async ({ data, request }) => {
-    const session = await getSession(request)
+  .handler(async ({ data }) => {
+    const session = await getSession()
     if (!session?.user) {
       throw new Error('Unauthorized')
     }

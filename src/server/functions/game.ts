@@ -1,4 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
+import { getRequest } from '@tanstack/start-server-core'
 import { prisma } from '@/db'
 import { auth } from '@/lib/auth'
 import { shuffleArray, checkPlacementCorrect, calculatePoints } from '@/lib/game/utils'
@@ -15,7 +16,8 @@ import type {
 } from '@/lib/pusher/events'
 
 // Get the current user's session
-async function getSession(request: Request) {
+async function getSession() {
+  const request = getRequest()
   return await auth.api.getSession({ headers: request.headers })
 }
 
@@ -26,8 +28,8 @@ export const startGame = createServerFn({
   .inputValidator(
     (data: { roomId: string; playlistId: string; totalRounds?: number }) => data
   )
-  .handler(async ({ data, request }) => {
-    const session = await getSession(request)
+  .handler(async ({ data }) => {
+    const session = await getSession()
     if (!session?.user) {
       throw new Error('Unauthorized')
     }
@@ -135,8 +137,8 @@ export const getGame = createServerFn({
   method: 'GET',
 })
   .inputValidator((data: { gameId: string }) => data)
-  .handler(async ({ data, request }) => {
-    const session = await getSession(request)
+  .handler(async ({ data }) => {
+    const session = await getSession()
     if (!session?.user) {
       throw new Error('Unauthorized')
     }
@@ -263,8 +265,8 @@ export const submitSongGuess = createServerFn({
   method: 'POST',
 })
   .inputValidator((data: { gameId: string; roundId: string; songNameGuess: string }) => data)
-  .handler(async ({ data, request }) => {
-    const session = await getSession(request)
+  .handler(async ({ data }) => {
+    const session = await getSession()
     if (!session?.user) {
       throw new Error('Unauthorized')
     }
@@ -334,8 +336,8 @@ export const submitPlacement = createServerFn({
   method: 'POST',
 })
   .inputValidator((data: { gameId: string; roundId: string; position: number }) => data)
-  .handler(async ({ data, request }) => {
-    const session = await getSession(request)
+  .handler(async ({ data }) => {
+    const session = await getSession()
     if (!session?.user) {
       throw new Error('Unauthorized')
     }
