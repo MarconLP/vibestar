@@ -20,21 +20,21 @@ export function Scoreboard({ players, currentPlayerId }: ScoreboardProps) {
       {sortedPlayers.map((player, index) => (
         <div
           key={player.id}
-          className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all ${
+          className={`flex items-center gap-2 px-3 py-2 rounded-xl transition-all ${
             player.id === currentPlayerId
-              ? 'bg-purple-500/30 ring-2 ring-purple-400'
-              : 'bg-white/5'
+              ? 'bg-green-500/20 ring-2 ring-green-400'
+              : 'bg-neutral-800/50 border border-white/5'
           }`}
         >
           {index === 0 && sortedPlayers.length > 1 && player.score > 0 && (
             <Trophy className="w-4 h-4 text-yellow-400" />
           )}
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white text-sm font-bold">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center text-black text-sm font-bold">
             {player.displayName[0]?.toUpperCase()}
           </div>
           <div className="text-right">
             <p className="text-sm text-white font-medium">{player.displayName}</p>
-            <p className="text-xs text-purple-400 font-bold">{player.score} pts</p>
+            <p className="text-xs text-green-400 font-bold">{player.score} pts</p>
           </div>
         </div>
       ))}
