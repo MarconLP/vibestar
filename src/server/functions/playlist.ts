@@ -1,15 +1,8 @@
 import { createServerFn } from '@tanstack/react-start'
-import { getRequest } from '@tanstack/start-server-core'
 import { prisma } from '@/db'
-import { auth } from '@/lib/auth'
 import { importPlaylistFromUrl } from '@/lib/youtube/api'
 import { extractPlaylistId } from '@/lib/youtube/parser'
-
-// Get the current user's session
-async function getSession() {
-  const request = getRequest()
-  return await auth.api.getSession({ headers: request.headers })
-}
+import { getSession } from '@/lib/session'
 
 // Import a playlist from YouTube
 export const importPlaylist = createServerFn({
@@ -17,9 +10,9 @@ export const importPlaylist = createServerFn({
 })
   .inputValidator((data: { playlistUrl: string }) => data)
   .handler(async ({ data }) => {
-    const session = await getSession()
-    if (!session?.user) {
-      throw new Error('Unauthorized')
+    const session = getSession()
+    if (!session) {
+      throw new Error('Not logged in')
     }
 
     const playlistId = extractPlaylistId(data.playlistUrl)
@@ -105,9 +98,9 @@ export const updateSong = createServerFn({
     (data: { songId: string; name?: string; artist?: string; releaseYear?: number }) => data
   )
   .handler(async ({ data }) => {
-    const session = await getSession()
-    if (!session?.user) {
-      throw new Error('Unauthorized')
+    const session = getSession()
+    if (!session) {
+      throw new Error('Not logged in')
     }
 
     const song = await prisma.song.update({

@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
-import { ArrowLeft, Loader2, Users } from 'lucide-react'
+import { ArrowLeft, Loader2, Users, User } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { joinRoom } from '@/server/functions/room'
 
@@ -10,19 +10,26 @@ export const Route = createFileRoute('/join')({
 
 function JoinGame() {
   const navigate = useNavigate()
+  const [displayName, setDisplayName] = useState('')
   const [code, setCode] = useState('')
   const [isJoining, setIsJoining] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const handleJoin = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!code.trim()) return
+    if (!code.trim() || !displayName.trim()) return
 
     setIsJoining(true)
     setError(null)
 
     try {
-      const result = await joinRoom({ data: { code: code.toUpperCase() } })
+      const result = await joinRoom({
+        data: { code: code.toUpperCase(), displayName: displayName.trim() },
+      })
+      // Set the session cookie from the response
+      if (result.cookie) {
+        document.cookie = result.cookie
+      }
       if (result.room) {
         navigate({ to: '/room/$code', params: { code: result.room.code } })
       }
@@ -70,6 +77,26 @@ function JoinGame() {
           <form onSubmit={handleJoin} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
+                <User className="w-4 h-4 inline mr-1" />
+                Your Name
+              </label>
+              <input
+                type="text"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="Enter your name"
+                className="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                style={{
+                  background: 'rgba(139, 92, 246, 0.1)',
+                  color: 'white',
+                }}
+                maxLength={20}
+                autoFocus
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 Room Code
               </label>
               <input
@@ -77,15 +104,13 @@ function JoinGame() {
                 value={code}
                 onChange={handleCodeChange}
                 placeholder="ABCD12"
-                className="w-full px-4 py-3 rounded-lg text-center text-2xl font-mono tracking-widest focus:outline-none focus:ring-2 transition-all"
+                className="w-full px-4 py-3 rounded-lg text-center text-2xl font-mono tracking-widest focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
                 style={{
                   background: 'rgba(139, 92, 246, 0.1)',
-                  borderColor: 'rgba(139, 92, 246, 0.3)',
                   color: 'white',
                 }}
                 maxLength={6}
                 autoComplete="off"
-                autoFocus
               />
               <p className="mt-2 text-sm text-gray-500 text-center">
                 Enter the 6-character room code
@@ -100,7 +125,7 @@ function JoinGame() {
 
             <button
               type="submit"
-              disabled={isJoining || code.length !== 6}
+              disabled={isJoining || code.length !== 6 || !displayName.trim()}
               className="w-full py-3 px-4 rounded-xl font-semibold text-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               style={{
                 background: 'linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%)',

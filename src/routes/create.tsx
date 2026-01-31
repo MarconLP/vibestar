@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
-import { ArrowLeft, Loader2, Settings } from 'lucide-react'
+import { ArrowLeft, Loader2, Settings, User } from 'lucide-react'
 import { Link } from '@tanstack/react-router'
 import { createRoom } from '@/server/functions/room'
 
@@ -10,20 +10,30 @@ export const Route = createFileRoute('/create')({
 
 function CreateGame() {
   const navigate = useNavigate()
+  const [displayName, setDisplayName] = useState('')
   const [isCreating, setIsCreating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [clipDuration, setClipDuration] = useState(15)
   const [maxPlayers, setMaxPlayers] = useState(4)
 
   const handleCreate = async () => {
+    if (!displayName.trim()) {
+      setError('Please enter your name')
+      return
+    }
+
     setIsCreating(true)
     setError(null)
 
     try {
-      const room = await createRoom({
-        data: { clipDuration, maxPlayers },
+      const result = await createRoom({
+        data: { clipDuration, maxPlayers, displayName: displayName.trim() },
       })
-      navigate({ to: '/room/$code', params: { code: room.code } })
+      // Set the session cookie from the response
+      if (result.cookie) {
+        document.cookie = result.cookie
+      }
+      navigate({ to: '/room/$code', params: { code: result.room.code } })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create room')
       setIsCreating(false)
@@ -61,6 +71,26 @@ function CreateGame() {
           </div>
 
           <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                <User className="w-4 h-4 inline mr-1" />
+                Your Name
+              </label>
+              <input
+                type="text"
+                value={displayName}
+                onChange={(e) => setDisplayName(e.target.value)}
+                placeholder="Enter your name"
+                className="w-full px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition-all"
+                style={{
+                  background: 'rgba(139, 92, 246, 0.1)',
+                  color: 'white',
+                }}
+                maxLength={20}
+                autoFocus
+              />
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Clip Duration (seconds)
@@ -109,7 +139,7 @@ function CreateGame() {
 
             <button
               onClick={handleCreate}
-              disabled={isCreating}
+              disabled={isCreating || !displayName.trim()}
               className="w-full py-3 px-4 rounded-xl font-semibold text-lg transition-all duration-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               style={{
                 background: 'linear-gradient(135deg, #8b5cf6 0%, #d946ef 100%)',

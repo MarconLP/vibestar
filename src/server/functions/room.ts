@@ -1,33 +1,27 @@
 import { createServerFn } from '@tanstack/react-start'
-import { getRequest } from '@tanstack/start-server-core'
 import { prisma } from '@/db'
-import { auth } from '@/lib/auth'
 import { generateRoomCode } from '@/lib/game/utils'
 import { triggerEvent } from '@/lib/pusher/server'
+import { getSession, generateSession, createSessionCookie } from '@/lib/session'
 import type {
   RoomPlayerJoinedEvent,
   RoomPlayerLeftEvent,
 } from '@/lib/pusher/events'
-
-// Get the current user's session
-async function getSession() {
-  const request = getRequest()
-  return await auth.api.getSession({ headers: request.headers })
-}
 
 // Create a new game room
 export const createRoom = createServerFn({
   method: 'POST',
 })
   .inputValidator(
-    (data: { clipDuration?: number; maxPlayers?: number }) => data,
+    (data: { clipDuration?: number; maxPlayers?: number; displayName: string }) => data,
   )
   .handler(async ({ data }) => {
-    console.log(process.env.DATABASE_URL)
-    const session = await getSession()
-    if (!session?.user) {
-      throw new Error('Unauthorized')
+    if (!data.displayName?.trim()) {
+      throw new Error('Display name is required')
     }
+
+    // Generate a new session for this user
+    const session = generateSession(data.displayName.trim())
 
     const code = generateRoomCode()
     const expiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000) // 2 hours
@@ -35,15 +29,14 @@ export const createRoom = createServerFn({
     const room = await prisma.gameRoom.create({
       data: {
         code,
-        hostId: session.user.id,
+        hostId: session.id,
         clipDuration: data.clipDuration ?? 15,
         maxPlayers: data.maxPlayers ?? 4,
         expiresAt,
         players: {
           create: {
-            userId: session.user.id,
-            displayName: session.user.name || 'Anonymous',
-            avatarUrl: session.user.image,
+            userId: session.id,
+            displayName: session.displayName,
             isHost: true,
           },
         },
@@ -51,7 +44,9 @@ export const createRoom = createServerFn({
       include: { players: true },
     })
 
-    return room
+    const cookie = createSessionCookie(session)
+
+    return { room, cookie }
   })
 
 // Get room by code
@@ -79,11 +74,10 @@ export const getRoomByCode = createServerFn({
 export const joinRoom = createServerFn({
   method: 'POST',
 })
-  .inputValidator((data: { code: string }) => data)
+  .inputValidator((data: { code: string; displayName: string }) => data)
   .handler(async ({ data }) => {
-    const session = await getSession()
-    if (!session?.user) {
-      throw new Error('Unauthorized')
+    if (!data.displayName?.trim()) {
+      throw new Error('Display name is required')
     }
 
     const room = await prisma.gameRoom.findUnique({
@@ -103,17 +97,24 @@ export const joinRoom = createServerFn({
       throw new Error('Room is full')
     }
 
-    // Check if already in room
-    const existing = room.players.find((p) => p.userId === session.user.id)
-    if (existing) {
-      return { room, player: existing, alreadyJoined: true }
+    // Check existing session
+    let session = getSession()
+
+    // Check if already in room with existing session
+    if (session) {
+      const existing = room.players.find((p) => p.userId === session!.id)
+      if (existing) {
+        return { room, player: existing, alreadyJoined: true, cookie: null }
+      }
     }
+
+    // Create new session if needed or update display name
+    session = generateSession(data.displayName.trim())
 
     const player = await prisma.player.create({
       data: {
-        userId: session.user.id,
-        displayName: session.user.name || 'Anonymous',
-        avatarUrl: session.user.image,
+        userId: session.id,
+        displayName: session.displayName,
         roomId: room.id,
       },
     })
@@ -132,7 +133,9 @@ export const joinRoom = createServerFn({
       include: { players: true },
     })
 
-    return { room: updatedRoom, player, alreadyJoined: false }
+    const cookie = createSessionCookie(session)
+
+    return { room: updatedRoom, player, alreadyJoined: false, cookie }
   })
 
 // Leave a room
@@ -141,14 +144,14 @@ export const leaveRoom = createServerFn({
 })
   .inputValidator((data: { roomId: string }) => data)
   .handler(async ({ data }) => {
-    const session = await getSession()
-    if (!session?.user) {
-      throw new Error('Unauthorized')
+    const session = getSession()
+    if (!session) {
+      throw new Error('Not logged in')
     }
 
     const player = await prisma.player.findFirst({
       where: {
-        userId: session.user.id,
+        userId: session.id,
         roomId: data.roomId,
       },
       include: { room: true },
@@ -193,9 +196,9 @@ export const updateRoomSettings = createServerFn({
       data,
   )
   .handler(async ({ data }) => {
-    const session = await getSession()
-    if (!session?.user) {
-      throw new Error('Unauthorized')
+    const session = getSession()
+    if (!session) {
+      throw new Error('Not logged in')
     }
 
     const room = await prisma.gameRoom.findUnique({
@@ -206,7 +209,7 @@ export const updateRoomSettings = createServerFn({
       throw new Error('Room not found')
     }
 
-    if (room.hostId !== session.user.id) {
+    if (room.hostId !== session.id) {
       throw new Error('Only the host can update settings')
     }
 

@@ -1,11 +1,10 @@
 import { createServerFn } from '@tanstack/react-start'
-import { getRequest } from '@tanstack/start-server-core'
 import { prisma } from '@/db'
-import { auth } from '@/lib/auth'
 import { shuffleArray, checkPlacementCorrect, calculatePoints } from '@/lib/game/utils'
 import { calculateClipStart } from '@/lib/youtube/api'
 import { fuzzyMatch } from '@/lib/game/fuzzy-match'
 import { triggerEvent } from '@/lib/pusher/server'
+import { getSession } from '@/lib/session'
 import type {
   RoomGameStartedEvent,
   GameRoundStartEvent,
@@ -15,12 +14,6 @@ import type {
   GameEndedEvent,
 } from '@/lib/pusher/events'
 
-// Get the current user's session
-async function getSession() {
-  const request = getRequest()
-  return await auth.api.getSession({ headers: request.headers })
-}
-
 // Start a game (host only)
 export const startGame = createServerFn({
   method: 'POST',
@@ -29,9 +22,9 @@ export const startGame = createServerFn({
     (data: { roomId: string; playlistId: string; totalRounds?: number }) => data
   )
   .handler(async ({ data }) => {
-    const session = await getSession()
-    if (!session?.user) {
-      throw new Error('Unauthorized')
+    const session = getSession()
+    if (!session) {
+      throw new Error('Not logged in')
     }
 
     const room = await prisma.gameRoom.findUnique({
@@ -43,7 +36,7 @@ export const startGame = createServerFn({
       throw new Error('Room not found')
     }
 
-    if (room.hostId !== session.user.id) {
+    if (room.hostId !== session.id) {
       throw new Error('Only the host can start the game')
     }
 
@@ -139,9 +132,9 @@ export const getGame = createServerFn({
 })
   .inputValidator((data: { gameId: string }) => data)
   .handler(async ({ data }) => {
-    const session = await getSession()
-    if (!session?.user) {
-      throw new Error('Unauthorized')
+    const session = getSession()
+    if (!session) {
+      throw new Error('Not logged in')
     }
 
     const game = await prisma.game.findUnique({
@@ -167,7 +160,7 @@ export const getGame = createServerFn({
     }
 
     // Get the current player's info
-    const player = game.room.players.find((p) => p.userId === session.user.id)
+    const player = game.room.players.find((p) => p.userId === session.id)
 
     // Get the player's timeline
     const timeline = player
@@ -268,9 +261,9 @@ export const submitSongGuess = createServerFn({
 })
   .inputValidator((data: { gameId: string; roundId: string; songNameGuess: string }) => data)
   .handler(async ({ data }) => {
-    const session = await getSession()
-    if (!session?.user) {
-      throw new Error('Unauthorized')
+    const session = getSession()
+    if (!session) {
+      throw new Error('Not logged in')
     }
 
     const round = await prisma.gameRound.findUnique({
@@ -286,7 +279,7 @@ export const submitSongGuess = createServerFn({
     }
 
     const player = await prisma.player.findFirst({
-      where: { userId: session.user.id, roomId: round.game.room.id },
+      where: { userId: session.id, roomId: round.game.room.id },
     })
 
     if (!player) {
@@ -339,9 +332,9 @@ export const submitPlacement = createServerFn({
 })
   .inputValidator((data: { gameId: string; roundId: string; position: number }) => data)
   .handler(async ({ data }) => {
-    const session = await getSession()
-    if (!session?.user) {
-      throw new Error('Unauthorized')
+    const session = getSession()
+    if (!session) {
+      throw new Error('Not logged in')
     }
 
     const round = await prisma.gameRound.findUnique({
@@ -368,7 +361,7 @@ export const submitPlacement = createServerFn({
     }
 
     const player = await prisma.player.findFirst({
-      where: { userId: session.user.id, roomId: round.game.room.id },
+      where: { userId: session.id, roomId: round.game.room.id },
     })
 
     if (!player) {
@@ -572,9 +565,9 @@ export const continueGame = createServerFn({
 })
   .inputValidator((data: { gameId: string; roundNumber: number }) => data)
   .handler(async ({ data }) => {
-    const session = await getSession()
-    if (!session?.user) {
-      throw new Error('Unauthorized')
+    const session = getSession()
+    if (!session) {
+      throw new Error('Not logged in')
     }
 
     const game = await prisma.game.findUnique({
@@ -591,7 +584,7 @@ export const continueGame = createServerFn({
     }
 
     // Only the current player can continue
-    const player = game.room.players.find((p) => p.userId === session.user.id)
+    const player = game.room.players.find((p) => p.userId === session.id)
     if (!player || game.currentPlayerId !== player.id) {
       throw new Error('Not your turn')
     }
