@@ -1,3 +1,22 @@
+// Strip common music metadata patterns like (prod. by X), (feat. X), [Remix], etc.
+function stripMusicMetadata(str: string): string {
+  return str
+    .replace(/\s*\(prod\.?\s*(by\s+)?[^)]*\)/gi, '') // (prod. by X) or (prod X)
+    .replace(/\s*\(ft\.?\s+[^)]*\)/gi, '') // (ft. X)
+    .replace(/\s*\(feat\.?\s+[^)]*\)/gi, '') // (feat. X)
+    .replace(/\s*\(featuring\s+[^)]*\)/gi, '') // (featuring X)
+    .replace(/\s*\(with\s+[^)]*\)/gi, '') // (with X)
+    .replace(/\s*\[remix\]/gi, '') // [Remix]
+    .replace(/\s*\(remix\)/gi, '') // (Remix)
+    .replace(/\s*\[.*?remix.*?\]/gi, '') // [X Remix]
+    .replace(/\s*\(.*?remix.*?\)/gi, '') // (X Remix)
+    .replace(/\s*\[.*?version.*?\]/gi, '') // [X Version]
+    .replace(/\s*\(.*?version.*?\)/gi, '') // (X Version)
+    .replace(/\s*\[.*?edit.*?\]/gi, '') // [X Edit]
+    .replace(/\s*\(.*?edit.*?\)/gi, '') // (X Edit)
+    .trim()
+}
+
 // Normalize a string for comparison
 function normalize(str: string): string {
   return str
@@ -42,7 +61,7 @@ function levenshteinDistance(a: string, b: string): number {
 // Uses fuzzy matching to handle typos and partial matches
 export function fuzzyMatch(guess: string, actual: string): boolean {
   const normalizedGuess = normalize(guess)
-  const normalizedActual = normalize(actual)
+  const normalizedActual = normalize(stripMusicMetadata(actual))
 
   // Exact match after normalization
   if (normalizedGuess === normalizedActual) {
@@ -77,7 +96,7 @@ export function fuzzyMatch(guess: string, actual: string): boolean {
 // Calculate a similarity score between 0 and 1
 export function similarityScore(guess: string, actual: string): number {
   const normalizedGuess = normalize(guess)
-  const normalizedActual = normalize(actual)
+  const normalizedActual = normalize(stripMusicMetadata(actual))
 
   if (!normalizedGuess || !normalizedActual) {
     return 0
