@@ -424,6 +424,7 @@ function GamePlay() {
                         }))}
                         placingMode={false}
                         guessPosition={contestWindow.placementPosition}
+                        isOwnGuess={isMyTurn}
                         contestVotes={contestSubmissions.map(s => ({ contesterName: s.contesterName, position: s.position }))}
                       />
                       {contestTimeRemaining === 0 && (
@@ -454,6 +455,7 @@ function GamePlay() {
                             }))}
                             placingMode={false}
                             guessPosition={contestWindow.placementPosition}
+                            isOwnGuess={isMyTurn}
                             contestVotes={contestSubmissions.map(s => ({ contesterName: s.contesterName, position: s.position }))}
                           />
                         </div>
@@ -471,6 +473,7 @@ function GamePlay() {
                             onPlacement={handleContestSubmit}
                             blockedPosition={contestWindow.placementPosition}
                             guessPosition={contestWindow.placementPosition}
+                            isOwnGuess={isMyTurn}
                             contestVotes={contestSubmissions.map(s => ({ contesterName: s.contesterName, position: s.position }))}
                           />
                           <p className="text-xs text-neutral-500 mt-2 text-center">
@@ -487,6 +490,7 @@ function GamePlay() {
                             }))}
                             placingMode={false}
                             guessPosition={contestWindow.placementPosition}
+                            isOwnGuess={isMyTurn}
                             contestVotes={contestSubmissions.map(s => ({ contesterName: s.contesterName, position: s.position }))}
                           />
                         </div>

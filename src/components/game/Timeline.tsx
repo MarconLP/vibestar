@@ -23,10 +23,11 @@ interface TimelineProps {
   onPlacement?: (position: number) => void
   blockedPosition?: number // Position that cannot be selected (used when contesting a correct placement)
   guessPosition?: number // Position where a player placed their guess (shows a marker)
+  isOwnGuess?: boolean // Whether the guess belongs to the current viewer
   contestVotes?: ContestVote[] // Contest votes from other players
 }
 
-export function Timeline({ entries, placingMode = false, onPlacement, blockedPosition, guessPosition, contestVotes = [] }: TimelineProps) {
+export function Timeline({ entries, placingMode = false, onPlacement, blockedPosition, guessPosition, isOwnGuess = false, contestVotes = [] }: TimelineProps) {
   const sortedEntries = [...entries].sort((a, b) => a.position - b.position)
 
   // Get contest votes for a specific position
@@ -49,7 +50,7 @@ export function Timeline({ entries, placingMode = false, onPlacement, blockedPos
 
       <div className="space-y-2">
         {/* Guess marker or drop zone at the beginning */}
-        {guessPosition === 0 && <GuessMarker />}
+        {guessPosition === 0 && <GuessMarker isOwnGuess={isOwnGuess} />}
         {getContestVotesForPosition(0).map((vote, i) => (
           <ContestMarker key={`contest-0-${i}`} contesterName={vote.contesterName} />
         ))}
@@ -62,7 +63,7 @@ export function Timeline({ entries, placingMode = false, onPlacement, blockedPos
             <TimelineCard entry={entry} />
 
             {/* Guess marker or drop zone after each entry */}
-            {guessPosition === index + 1 && <GuessMarker />}
+            {guessPosition === index + 1 && <GuessMarker isOwnGuess={isOwnGuess} />}
             {getContestVotesForPosition(index + 1).map((vote, i) => (
               <ContestMarker key={`contest-${index + 1}-${i}`} contesterName={vote.contesterName} />
             ))}
@@ -115,14 +116,14 @@ function TimelineCard({ entry }: { entry: TimelineEntry }) {
   )
 }
 
-function GuessMarker() {
+function GuessMarker({ isOwnGuess }: { isOwnGuess: boolean }) {
   return (
     <div className="relative w-full pl-10 py-1">
       {/* Connector dot */}
       <div className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-yellow-500 ring-4 ring-yellow-500/20 animate-pulse" />
 
       <div className="flex items-center justify-center gap-2 p-2 rounded-xl border-2 border-yellow-500/50 bg-yellow-500/10">
-        <span className="text-sm font-medium text-yellow-400">Their guess</span>
+        <span className="text-sm font-medium text-yellow-400">{isOwnGuess ? 'Your guess' : 'Their guess'}</span>
       </div>
     </div>
   )
