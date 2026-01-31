@@ -120,7 +120,7 @@ export const joinRoom = createServerFn({
       player: {
         id: player.id,
         displayName: player.displayName,
-        avatarUrl: player.avatarUrl,
+        avatarUrl: player.avatarUrl ?? undefined,
       },
     } satisfies RoomPlayerJoinedEvent)
 

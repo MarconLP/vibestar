@@ -40,7 +40,7 @@ export function authorizeChannel(
   socketId: string,
   channel: string,
   presenceData?: { user_id: string; user_info?: Record<string, unknown> }
-): Pusher.ChannelAuthResponse | Pusher.PresenceChannelAuthResponse {
+): Pusher.ChannelAuthResponse {
   const pusher = getPusher()
 
   if (channel.startsWith('presence-') && presenceData) {

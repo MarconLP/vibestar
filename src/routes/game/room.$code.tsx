@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, redirect } from '@tanstack/react-router'
 import { useState, useEffect } from 'react'
 import { Copy, Check, Users, Play, Music, Loader2, LogOut } from 'lucide-react'
-import { getRoomByCode, setPlayerReady, leaveRoom } from '@/server/functions/room'
+import { getRoomByCode, leaveRoom } from '@/server/functions/room'
 import { startGame } from '@/server/functions/game'
 import { getPlaylists, importPlaylist } from '@/server/functions/playlist'
 import { usePresenceChannel, useChannel } from '@/hooks/usePusher'
@@ -42,11 +42,8 @@ function RoomLobby() {
   const [playlistUrl, setPlaylistUrl] = useState('')
   const [error, setError] = useState<string | null>(null)
 
-  // Get current user's player
-  const currentPlayer = room.players.find((p) => p.isHost) // This should be from session
-
   // Subscribe to room presence
-  const { members, myId } = usePresenceChannel(`presence-room-${room.code}`)
+  const { myId } = usePresenceChannel(`presence-room-${room.code}`)
   const { bind, unbind } = useChannel(`presence-room-${room.code}`)
 
   useEffect(() => {
@@ -62,7 +59,7 @@ function RoomLobby() {
     bind<RoomPlayerJoinedEvent>('room:player-joined', (data) => {
       setRoom((prev) => ({
         ...prev,
-        players: [...prev.players, { ...data.player, isReady: false, isHost: false, score: 0, joinedAt: new Date().toISOString(), roomId: prev.id, userId: '' }],
+        players: [...prev.players, { ...data.player, isReady: false, isHost: false, score: 0, joinedAt: new Date(), roomId: prev.id, userId: '', avatarUrl: data.player.avatarUrl ?? null }],
       }))
     })
 
@@ -100,7 +97,7 @@ function RoomLobby() {
 
     try {
       const playlist = await importPlaylist({ data: { playlistUrl } })
-      setPlaylists((prev) => [playlist, ...prev])
+      setPlaylists((prev) => [{ ...playlist, _count: { songs: playlist.songs?.length ?? 0 } }, ...prev])
       setSelectedPlaylistId(playlist.id)
       setPlaylistUrl('')
     } catch (err) {

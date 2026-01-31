@@ -20,8 +20,8 @@ export function YouTubePlayer({
   const [isPlaying, setIsPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
   const [isMuted, setIsMuted] = useState(false)
-  const intervalRef = useRef<NodeJS.Timeout>()
-  const startTimeRef = useRef<number>()
+  const intervalRef = useRef<NodeJS.Timeout>(undefined)
+  const startTimeRef = useRef<number>(undefined)
 
   const clipDuration = endTime - startTime
 
