@@ -64,6 +64,16 @@ export interface GameRoundResultEvent {
     position: number | null
     isCorrect: boolean
   }>
+  // The current player's timeline (for displaying on the result screen)
+  currentPlayerTimeline?: Array<{
+    id: string
+    position: number
+    song: {
+      name: string
+      artist: string
+      releaseYear: number
+    }
+  }>
 }
 
 export interface GameContestSubmittedEvent {

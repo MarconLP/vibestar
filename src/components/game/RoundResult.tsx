@@ -1,6 +1,7 @@
 import { Check, X, Music, Coins, Trophy, Sparkles, Crown, XCircle } from 'lucide-react'
 import { SONGS_TO_WIN } from '@/lib/game/utils'
 import type { GameRoundResultEvent } from '@/lib/pusher/events'
+import { Timeline } from './Timeline'
 
 interface RoundResultProps {
   result: GameRoundResultEvent
@@ -11,11 +12,19 @@ interface RoundResultProps {
 }
 
 export function RoundResult({ result, isMyTurn, onContinue }: RoundResultProps) {
-  const { songNameGuess, songNameCorrect, placementCorrect, timelineCount, actualSong, tokenEarned, contestResults } = result
+  const { songNameGuess, songNameCorrect, placementCorrect, timelineCount, actualSong, tokenEarned, contestResults, currentPlayerTimeline } = result
 
   const hasContests = contestResults && contestResults.length > 1
   const winners = contestResults?.filter((cr) => cr.isCorrect) ?? []
   const losers = contestResults?.filter((cr) => !cr.isCorrect) ?? []
+
+  // Build result markers for the timeline
+  const resultMarkers = contestResults?.map((cr) => ({
+    playerName: cr.playerName,
+    position: cr.position ?? 0,
+    isCorrect: cr.isCorrect,
+    isOriginal: cr.isOriginal,
+  })) ?? []
 
   return (
     <div className="p-6 rounded-2xl bg-neutral-900/50 border border-white/10 backdrop-blur-sm">
@@ -38,6 +47,21 @@ export function RoundResult({ result, isMyTurn, onContinue }: RoundResultProps) 
           </div>
         </div>
       </div>
+
+      {/* Timeline with placement markers */}
+      {currentPlayerTimeline && currentPlayerTimeline.length > 0 && (
+        <div className="mb-6">
+          <h3 className="text-sm font-medium text-neutral-400 mb-3">Placements on Timeline</h3>
+          <Timeline
+            entries={currentPlayerTimeline.map((e, i) => ({
+              ...e,
+              song: { ...e.song, id: `temp-${i}`, thumbnailUrl: null },
+            }))}
+            placingMode={false}
+            resultMarkers={resultMarkers}
+          />
+        </div>
+      )}
 
       {/* Contest Results - Featured Section */}
       {hasContests && (

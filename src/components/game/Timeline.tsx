@@ -1,4 +1,4 @@
-import { Music, Plus } from 'lucide-react'
+import { Music, Plus, Check, X } from 'lucide-react'
 
 interface TimelineEntry {
   id: string
@@ -17,6 +17,14 @@ interface ContestVote {
   position: number
 }
 
+// For showing results with correct/incorrect status
+interface ResultMarker {
+  playerName: string
+  position: number
+  isCorrect: boolean
+  isOriginal: boolean
+}
+
 interface TimelineProps {
   entries: TimelineEntry[]
   placingMode?: boolean
@@ -25,14 +33,19 @@ interface TimelineProps {
   guessPosition?: number // Position where a player placed their guess (shows a marker)
   isOwnGuess?: boolean // Whether the guess belongs to the current viewer
   contestVotes?: ContestVote[] // Contest votes from other players
+  resultMarkers?: ResultMarker[] // For showing results with correct/incorrect status
 }
 
-export function Timeline({ entries, placingMode = false, onPlacement, blockedPosition, guessPosition, isOwnGuess = false, contestVotes = [] }: TimelineProps) {
+export function Timeline({ entries, placingMode = false, onPlacement, blockedPosition, guessPosition, isOwnGuess = false, contestVotes = [], resultMarkers = [] }: TimelineProps) {
   const sortedEntries = [...entries].sort((a, b) => a.position - b.position)
 
   // Get contest votes for a specific position
   const getContestVotesForPosition = (position: number) =>
     contestVotes.filter(v => v.position === position)
+
+  // Get result markers for a specific position
+  const getResultMarkersForPosition = (position: number) =>
+    resultMarkers.filter(m => m.position === position)
 
   if (entries.length === 0 && !placingMode) {
     return (
@@ -54,6 +67,9 @@ export function Timeline({ entries, placingMode = false, onPlacement, blockedPos
         {getContestVotesForPosition(0).map((vote, i) => (
           <ContestMarker key={`contest-0-${i}`} contesterName={vote.contesterName} />
         ))}
+        {getResultMarkersForPosition(0).map((marker, i) => (
+          <ResultMarkerComponent key={`result-0-${i}`} marker={marker} />
+        ))}
         {placingMode && guessPosition !== 0 && (
           <DropZone position={0} onDrop={onPlacement} label="Before all" blocked={blockedPosition === 0} />
         )}
@@ -66,6 +82,9 @@ export function Timeline({ entries, placingMode = false, onPlacement, blockedPos
             {guessPosition === index + 1 && <GuessMarker isOwnGuess={isOwnGuess} />}
             {getContestVotesForPosition(index + 1).map((vote, i) => (
               <ContestMarker key={`contest-${index + 1}-${i}`} contesterName={vote.contesterName} />
+            ))}
+            {getResultMarkersForPosition(index + 1).map((marker, i) => (
+              <ResultMarkerComponent key={`result-${index + 1}-${i}`} marker={marker} />
             ))}
             {placingMode && guessPosition !== index + 1 && (
               <DropZone
@@ -137,6 +156,41 @@ function ContestMarker({ contesterName }: { contesterName: string }) {
 
       <div className="flex items-center justify-center gap-2 p-2 rounded-xl border-2 border-purple-500/50 bg-purple-500/10">
         <span className="text-sm font-medium text-purple-400">{contesterName}'s contest</span>
+      </div>
+    </div>
+  )
+}
+
+function ResultMarkerComponent({ marker }: { marker: ResultMarker }) {
+  const isCorrect = marker.isCorrect
+  const bgColor = isCorrect ? 'bg-green-500' : 'bg-red-500'
+  const ringColor = isCorrect ? 'ring-green-500/20' : 'ring-red-500/20'
+  const borderColor = isCorrect ? 'border-green-500/50' : 'border-red-500/50'
+  const bgFill = isCorrect ? 'bg-green-500/10' : 'bg-red-500/10'
+  const textColor = isCorrect ? 'text-green-400' : 'text-red-400'
+
+  return (
+    <div className="relative w-full pl-10 py-1">
+      {/* Connector dot */}
+      <div className={`absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full ${bgColor} ring-4 ${ringColor}`} />
+
+      <div className={`flex items-center justify-between gap-2 p-2 rounded-xl border-2 ${borderColor} ${bgFill}`}>
+        <div className="flex items-center gap-2">
+          {isCorrect ? (
+            <Check className={`w-4 h-4 ${textColor}`} />
+          ) : (
+            <X className={`w-4 h-4 ${textColor}`} />
+          )}
+          <span className={`text-sm font-medium ${textColor}`}>
+            {marker.playerName}
+            <span className="text-xs ml-1 opacity-70">
+              ({marker.isOriginal ? 'Original' : 'Contest'})
+            </span>
+          </span>
+        </div>
+        <span className={`text-xs font-bold ${textColor}`}>
+          {isCorrect ? 'Correct!' : 'Wrong'}
+        </span>
       </div>
     </div>
   )

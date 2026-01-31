@@ -821,6 +821,13 @@ async function revealResultsInternal(
     where: { playerId: player.id },
   })
 
+  // Get the current player's timeline with song details (for result display)
+  const currentPlayerTimeline = await prisma.timelineEntry.findMany({
+    where: { playerId: player.id },
+    include: { song: true },
+    orderBy: { position: 'asc' },
+  })
+
   // DEBUG: Log final results before sending
   console.log('revealResultsInternal sending event with contestResults:', {
     resultsCount: results.length,
@@ -844,6 +851,15 @@ async function revealResultsInternal(
       releaseYear: round.song.releaseYear,
     },
     contestResults: results,
+    currentPlayerTimeline: currentPlayerTimeline.map((entry) => ({
+      id: entry.id,
+      position: entry.position,
+      song: {
+        name: entry.song.name,
+        artist: entry.song.artist,
+        releaseYear: entry.song.releaseYear,
+      },
+    })),
   } satisfies GameRoundResultEvent)
 
   await triggerEvent(`private-game-${gameId}`, 'game:round-phase', {
