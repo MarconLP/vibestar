@@ -14,6 +14,7 @@ import { Route as CreateRouteImport } from './routes/create'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as RoomCodeRouteImport } from './routes/room.$code'
 import { Route as PlayGameIdRouteImport } from './routes/play.$gameId'
+import { Route as ApiPusherWebhooksRouteImport } from './routes/api/pusher/webhooks'
 import { Route as ApiPusherAuthRouteImport } from './routes/api/pusher/auth'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
@@ -42,6 +43,11 @@ const PlayGameIdRoute = PlayGameIdRouteImport.update({
   path: '/play/$gameId',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPusherWebhooksRoute = ApiPusherWebhooksRouteImport.update({
+  id: '/api/pusher/webhooks',
+  path: '/api/pusher/webhooks',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPusherAuthRoute = ApiPusherAuthRouteImport.update({
   id: '/api/pusher/auth',
   path: '/api/pusher/auth',
@@ -61,6 +67,7 @@ export interface FileRoutesByFullPath {
   '/room/$code': typeof RoomCodeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/pusher/auth': typeof ApiPusherAuthRoute
+  '/api/pusher/webhooks': typeof ApiPusherWebhooksRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -70,6 +77,7 @@ export interface FileRoutesByTo {
   '/room/$code': typeof RoomCodeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/pusher/auth': typeof ApiPusherAuthRoute
+  '/api/pusher/webhooks': typeof ApiPusherWebhooksRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -80,6 +88,7 @@ export interface FileRoutesById {
   '/room/$code': typeof RoomCodeRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/pusher/auth': typeof ApiPusherAuthRoute
+  '/api/pusher/webhooks': typeof ApiPusherWebhooksRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -91,6 +100,7 @@ export interface FileRouteTypes {
     | '/room/$code'
     | '/api/auth/$'
     | '/api/pusher/auth'
+    | '/api/pusher/webhooks'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -100,6 +110,7 @@ export interface FileRouteTypes {
     | '/room/$code'
     | '/api/auth/$'
     | '/api/pusher/auth'
+    | '/api/pusher/webhooks'
   id:
     | '__root__'
     | '/'
@@ -109,6 +120,7 @@ export interface FileRouteTypes {
     | '/room/$code'
     | '/api/auth/$'
     | '/api/pusher/auth'
+    | '/api/pusher/webhooks'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -119,6 +131,7 @@ export interface RootRouteChildren {
   RoomCodeRoute: typeof RoomCodeRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiPusherAuthRoute: typeof ApiPusherAuthRoute
+  ApiPusherWebhooksRoute: typeof ApiPusherWebhooksRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -158,6 +171,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlayGameIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/pusher/webhooks': {
+      id: '/api/pusher/webhooks'
+      path: '/api/pusher/webhooks'
+      fullPath: '/api/pusher/webhooks'
+      preLoaderRoute: typeof ApiPusherWebhooksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/pusher/auth': {
       id: '/api/pusher/auth'
       path: '/api/pusher/auth'
@@ -183,6 +203,7 @@ const rootRouteChildren: RootRouteChildren = {
   RoomCodeRoute: RoomCodeRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiPusherAuthRoute: ApiPusherAuthRoute,
+  ApiPusherWebhooksRoute: ApiPusherWebhooksRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
