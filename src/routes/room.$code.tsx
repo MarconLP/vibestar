@@ -4,7 +4,7 @@ import { Copy, Check, Users, Play, Music, Loader2, LogOut } from 'lucide-react'
 import { getRoomByCode, leaveRoom } from '@/server/functions/room'
 import { startGame } from '@/server/functions/game'
 import { getPlaylists, importPlaylist } from '@/server/functions/playlist'
-import { usePresenceChannel, useChannel } from '@/hooks/usePusher'
+import { usePresenceChannel } from '@/hooks/usePusher'
 import { authClient } from '@/lib/auth-client'
 import type {
   RoomPlayerJoinedEvent,
@@ -43,8 +43,7 @@ function RoomLobby() {
   const [error, setError] = useState<string | null>(null)
 
   // Subscribe to room presence
-  const { myId } = usePresenceChannel(`presence-room-${room.code}`)
-  const { bind, unbind } = useChannel(`presence-room-${room.code}`)
+  const { myId, bind, unbind } = usePresenceChannel(`presence-room-${room.code}`)
 
   useEffect(() => {
     bind<RoomPlayerJoinedEvent>('room:player-joined', (data) => {

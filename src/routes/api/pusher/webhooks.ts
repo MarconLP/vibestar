@@ -37,25 +37,33 @@ export const Route = createFileRoute('/api/pusher/webhooks')({
   },
 })
 
-// Extract room code from channel name (e.g., "presence-room-ABC123" -> "ABC123")
-function extractRoomCode(channel: string): string | null {
-  const match = channel.match(/^presence-room-([A-Z0-9]+)$/)
-  return match ? match[1] : null
-}
-
-// Handle when a room channel becomes empty
+// Handle when a channel becomes empty
 async function handleChannelVacated(channel: string) {
-  const roomCode = extractRoomCode(channel)
-  if (!roomCode) {
-    return // Not a room channel, ignore
+  // Handle room lobby vacancy - only clean up if no game started
+  const roomCode = channel.match(/^presence-room-([A-Z0-9]+)$/)?.[1]
+  if (roomCode) {
+    try {
+      await prisma.gameRoom.delete({
+        where: {
+          code: roomCode,
+          game: null, // Only delete if no game exists
+        },
+      })
+    } catch {
+      // Room might already be deleted, have an active game, or not exist
+    }
+    return
   }
 
-  // Delete the room and all associated data (cascade will handle players, games, etc.)
-  try {
-    await prisma.gameRoom.delete({
-      where: { code: roomCode },
-    })
-  } catch {
-    // Room might already be deleted or not exist
+  // Handle game channel vacancy - clean up when game is over
+  const gameId = channel.match(/^private-game-(.+)$/)?.[1]
+  if (gameId) {
+    try {
+      await prisma.game.delete({
+        where: { id: gameId },
+      })
+    } catch {
+      // Game might already be deleted or not exist
+    }
   }
 }
