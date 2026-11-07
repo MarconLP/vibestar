@@ -9,18 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as JoinRouteImport } from './routes/join'
-import { Route as CreateRouteImport } from './routes/create'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as RoomCodeRouteImport } from './routes/room.$code'
+import { Route as CreateRouteImport } from './routes/create'
+import { Route as JoinRouteImport } from './routes/join'
 import { Route as PlayGameIdRouteImport } from './routes/play.$gameId'
-import { Route as ApiPusherWebhooksRouteImport } from './routes/api/pusher/webhooks'
-import { Route as ApiPusherAuthRouteImport } from './routes/api/pusher/auth'
+import { Route as RoomCodeRouteImport } from './routes/room.$code'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiPusherAuthRouteImport } from './routes/api/pusher/auth'
+import { Route as ApiPusherWebhooksRouteImport } from './routes/api/pusher/webhooks'
 
-const JoinRoute = JoinRouteImport.update({
-  id: '/join',
-  path: '/join',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CreateRoute = CreateRouteImport.update({
@@ -28,14 +28,9 @@ const CreateRoute = CreateRouteImport.update({
   path: '/create',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RoomCodeRoute = RoomCodeRouteImport.update({
-  id: '/room/$code',
-  path: '/room/$code',
+const JoinRoute = JoinRouteImport.update({
+  id: '/join',
+  path: '/join',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PlayGameIdRoute = PlayGameIdRouteImport.update({
@@ -43,9 +38,14 @@ const PlayGameIdRoute = PlayGameIdRouteImport.update({
   path: '/play/$gameId',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiPusherWebhooksRoute = ApiPusherWebhooksRouteImport.update({
-  id: '/api/pusher/webhooks',
-  path: '/api/pusher/webhooks',
+const RoomCodeRoute = RoomCodeRouteImport.update({
+  id: '/room/$code',
+  path: '/room/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPusherAuthRoute = ApiPusherAuthRouteImport.update({
@@ -53,9 +53,9 @@ const ApiPusherAuthRoute = ApiPusherAuthRouteImport.update({
   path: '/api/pusher/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
-  id: '/api/auth/$',
-  path: '/api/auth/$',
+const ApiPusherWebhooksRoute = ApiPusherWebhooksRouteImport.update({
+  id: '/api/pusher/webhooks',
+  path: '/api/pusher/webhooks',
   getParentRoute: () => rootRouteImport,
 } as any)
 
@@ -136,11 +136,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/join': {
-      id: '/join'
-      path: '/join'
-      fullPath: '/join'
-      preLoaderRoute: typeof JoinRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/create': {
@@ -150,18 +150,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CreateRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/room/$code': {
-      id: '/room/$code'
-      path: '/room/$code'
-      fullPath: '/room/$code'
-      preLoaderRoute: typeof RoomCodeRouteImport
+    '/join': {
+      id: '/join'
+      path: '/join'
+      fullPath: '/join'
+      preLoaderRoute: typeof JoinRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/play/$gameId': {
@@ -171,11 +164,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlayGameIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/pusher/webhooks': {
-      id: '/api/pusher/webhooks'
-      path: '/api/pusher/webhooks'
-      fullPath: '/api/pusher/webhooks'
-      preLoaderRoute: typeof ApiPusherWebhooksRouteImport
+    '/room/$code': {
+      id: '/room/$code'
+      path: '/room/$code'
+      fullPath: '/room/$code'
+      preLoaderRoute: typeof RoomCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/pusher/auth': {
@@ -185,11 +185,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPusherAuthRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/auth/$': {
-      id: '/api/auth/$'
-      path: '/api/auth/$'
-      fullPath: '/api/auth/$'
-      preLoaderRoute: typeof ApiAuthSplatRouteImport
+    '/api/pusher/webhooks': {
+      id: '/api/pusher/webhooks'
+      path: '/api/pusher/webhooks'
+      fullPath: '/api/pusher/webhooks'
+      preLoaderRoute: typeof ApiPusherWebhooksRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
